@@ -16,7 +16,7 @@ require(['./configuration', './inputBlocker', './wordLogic', './animation'],
     function (Configuration, InputBlocker, WordLogic, Animation)
     {
         'use strict';
-    
+
         var totalScore = 0;
         var highScoreContainer;
         var scoreContainer;
@@ -56,10 +56,10 @@ require(['./configuration', './inputBlocker', './wordLogic', './animation'],
                 insertLetter(letterPreview);
             }
 
-            //nextLetter = document.getElementById('nextLetter');
-            //nextLetter.parentElement.classList.add('selected');
+            document.body.onresize = onResize;
 
-            // document.body.onresize = onResize;
+            var restartButton = document.getElementById('restartButton');
+            restartButton.addEventListener('click', onRestartButtonClicked);
 
             var submitButton = document.getElementById('submitButton');
             submitButton.addEventListener('click', onSubmitButtonClicked);
@@ -77,6 +77,11 @@ require(['./configuration', './inputBlocker', './wordLogic', './animation'],
         function onBodyClicked()
         {
             selectContainer(nextLetterContainer);
+        }
+
+        function onRestartButtonClicked()
+        {
+            location.reload();
         }
 
         function onSubmitButtonClicked()
@@ -154,7 +159,7 @@ require(['./configuration', './inputBlocker', './wordLogic', './animation'],
             }
 
             Animation.moveLetter(selectedContainer, container, 250);
-            
+
             selectContainer(nextLetterContainer);
 
             if (nextLetterContainer.innerHTML === '')
@@ -201,44 +206,6 @@ require(['./configuration', './inputBlocker', './wordLogic', './animation'],
             }, 10);
         }
 
-        function whichTransitionEvent()
-        {
-            var t;
-            var el = document.createElement('fakeelement');
-            var transitions = {
-                'transition': 'transitionend',
-                'OTransition': 'oTransitionEnd',
-                'MozTransition': 'transitionend',
-                'WebkitTransition': 'webkitTransitionEnd'
-            };
-
-            for (t in transitions)
-            {
-                if (el.style[t] !== undefined)
-                {
-                    return transitions[t];
-                }
-            }
-        }
-
-        function getPosition(element)
-        {
-            var xPosition = 0;
-            var yPosition = 0;
-
-            while (element)
-            {
-                xPosition += (element.offsetLeft - element.scrollLeft + element.clientLeft);
-                yPosition += (element.offsetTop - element.scrollTop + element.clientTop);
-                element = element.offsetParent;
-            }
-
-            return {
-                x: xPosition,
-                y: yPosition
-            };
-        }
-
         function selectContainer(container)
         {
             for (var i = 0; i < letterContainers.length; ++i)
@@ -263,7 +230,7 @@ require(['./configuration', './inputBlocker', './wordLogic', './animation'],
 
         function onResize()
         {
-            var letterQueue = document.getElementById('letterQueue');
+            setCalculatedLetterSize(restartButton);
 
             for (var i = 0; i < letterContainers.length; ++i)
             {
@@ -276,26 +243,6 @@ require(['./configuration', './inputBlocker', './wordLogic', './animation'],
 
             var displayText = document.getElementById('displayText');
             setCalculatedLetterSize(displayText);
-
-            //             var letterContainers = document.getElementsByClassName('letterContainer');
-            //             for (var i = 0; i < letterContainers.length; ++i)
-            //             {
-            //                 var letterContainer = letterContainers[i];
-            //                 letterContainer.style.height = letterContainer.offsetWidth;
-            //                 setCalculatedLetterSize(letterContainer);
-            //             }
-            //            var letters = document.getElementsByClassName('letterPreview');
-            //            for (i = 0; i < letters.length; ++i)
-            //            {
-            //                setCalculatedLetterSize(letters[i]);
-            //            }
-            //
-            //            var letterPreviews = document.getElementsByClassName('small');
-            //            for (i = 0; i < letterPreviews.length; ++i)
-            //            {
-            //                var letterPreview = letterPreviews[i].firstElementChild;
-            //                //setCalculatedLetterSize(letterPreview);
-            //            }
         }
 
         function setCalculatedLetterSize(element)

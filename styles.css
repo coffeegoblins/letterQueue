@@ -4,6 +4,14 @@ body {
     padding: 0;
     background: #852C00;
 }
+#restartButton {
+    position:absolute;
+    color: #FFF;
+    top: 0;
+    left: 0;
+    height: 6.25%;
+    padding: 5px;
+}
 #letterQueue,
 #wordAssembly,
 #extras {
