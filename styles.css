@@ -124,6 +124,7 @@ body {
     height: 12%;
 }
 #storageLabel {
+    padding-left: 50%;
     width: 50%;
     height: 5%;
     text-align: center;

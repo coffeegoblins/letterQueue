@@ -6,7 +6,7 @@
       "projectTypeName": "com.intel.xdk.projecttype.jsapp",
       "src": "",
       "projectGuid": "4208571b-5494-4540-9e05-2d8c4707a1a1",
-      "lastModifiedDate": 1420142094409,
+      "lastModifiedDate": 1420154548197,
       "creationDate": 1420142094394
     },
     "sourceDirectory": "",
@@ -76,11 +76,13 @@
         "name_": "Android-Crosswalk",
         "preferences_": {
           "android-minSdkVersion": "14",
-          "android-targetSdkVersion": "19"
+          "android-targetSdkVersion": "19",
+          "Fullscreen": true,
+          "android-installLocation": "auto"
         },
         "isActive_": true,
         "appName_": "LetterQueue",
-        "appID_": "not.yet.specified",
+        "appID_": "com.letterqueue.android",
         "appAccess_": "*",
         "icons_": [],
         "splashes_": [],
@@ -90,7 +92,9 @@
         "cordovaCLIVersion_": "3.3",
         "appVersion_": "0.0.1",
         "appVersionCode_": "1",
-        "crosswalkVersion_": "stable"
+        "crosswalkVersion_": "stable",
+        "appDescription_": "This app is still in development.",
+        "appAuthor_": "Coffee Goblins"
       },
       "iOS": {
         "platform_": "ios",
@@ -146,6 +150,9 @@
         "cordovaCLIVersion_": "3.3",
         "appVersion_": "0.0.0.1"
       }
-    }
+    },
+    "gameAssetDirectory": "asset",
+    "gameMetadata": {},
+    "projectTags": []
   }
 }
