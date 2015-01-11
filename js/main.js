@@ -12,7 +12,7 @@ require.config(
     }
 });
 
-require(['./configuration', './inputBlocker', './wordLogic', './animation'],
+require(['js/configuration', 'js/inputBlocker', 'js/wordLogic', 'js/animation'],
     function (Configuration, InputBlocker, WordLogic, Animation)
     {
         'use strict';

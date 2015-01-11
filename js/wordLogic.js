@@ -1,4 +1,4 @@
-define(['text!./optimizedTrie.txt', ], function (WordTrie)
+define(['text!../optimizedTrie.txt', ], function (WordTrie)
 {
     'use strict';
     WordTrie = JSON.parse(WordTrie);
