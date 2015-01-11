@@ -24,7 +24,7 @@ define(['./inputBlocker'], function (InputBlocker)
         moveLetter: function (sourceContainer, targetContainer, milliseconds, callback)
         {
             InputBlocker.enable();
-            
+
             var sourcePosition = getPosition(sourceContainer);
             var targetPosition = getPosition(targetContainer);
 
@@ -74,9 +74,9 @@ define(['./inputBlocker'], function (InputBlocker)
                     targetContainer.innerHTML = div.innerHTML;
                     div.innerHTML = '';
                     document.body.removeChild(div);
-                    
+
                     InputBlocker.disable();
-                    
+
                     if (callback)
                     {
                         callback();

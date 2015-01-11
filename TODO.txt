@@ -2,6 +2,7 @@ Fix Storage Label Location
 Buy a vowel
 Drag letter
 Ads
+Images instead of dynamic letters
 
 
 
