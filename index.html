@@ -2,66 +2,108 @@
 
 <head>
     <title>Letter Queue</title>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0" />
     <link rel="stylesheet" type="text/css" href="styles.css">
-    <script type="text/javascript">
-        window.requireNode = window.require;
-        window.require = undefined;
+    <script src="cordova.js"></script>
+    <script type="text/javascript" src="lib/require.js"></script>
+    <script>
+        function onDocumentReady()
+        {
+            require.nodeRequire = window.requireNode;
+            require.config(
+            {
+                baseUrl: '',
+                paths:
+                {
+                    text: 'lib/text'
+                }
+            });
+
+            if (document.URL.match(/^https?:/))
+                onDeviceReady();
+            else
+                document.addEventListener('deviceready', onDeviceReady, false);
+
+            function onDeviceReady()
+            {
+                require(['js/main', 'js/adMob'], function (Main, AdMob)
+                {
+                    Main.initialize();
+
+                    if (AdMob.initialize())
+                    {
+                        AdMob.showBanner();
+                        AdMob.showInterstitial();
+
+                        Main.on('restart', AdMob.showInterstitial, AdMob);
+                        Main.on('resume', AdMob.showInterstitial, AdMob);
+                    }
+                });
+            };
+        }
+
+        if (document.readyState === 'complete')
+            onDocumentReady();
+        else
+            window.addEventListener('load', onDocumentReady, false);
+
+        window.addEventListener('error', function (e)
+        {
+            if (e.error)
+            {
+                // TODO Remove
+                alert(e.error.message);
+                alert(e.error.stack);
+            }
+        });
     </script>
-    <script type="text/javascript" data-main="js/main.js" src="lib/require.js"></script>
 </head>
 
 <body>
-    <div id="restartButton">
-        Restart
-    </div>
     <div id="letterQueue">
-        <div class="letterContainer previewContainer selectableItem" id="nextletterContainer"></div>
-        <div class="letterContainer previewContainer small small0"></div>
-        <div class="letterContainer previewContainer small small1"></div>
-        <div class="letterContainer previewContainer small small2"></div>
-        <div class="letterContainer previewContainer small small3"></div>
-        <div class="letterContainer previewContainer small small4"></div>
-        <div class="letterContainer previewContainer small small5"></div>
-        <div class="letterContainer previewContainer small small6"></div>
+        <div class="letterContainer letterPreview1">a</div>
+        <div class="letterContainer letterPreview2">b</div>
+        <div class="letterContainer letterPreview3">c</div>
+        <div class="letterContainer letterPreview4">d</div>
+        <div class="letterContainer letterPreview5">e</div>
+        <div class="letterContainer letterPreview6">f</div>
+        <div class="letterContainer">h</div>
     </div>
-    <div id="assemblyFiller"></div>
-    <div id="assemblyContainers">
-        <div class="letterContainer assembly selectableItem"></div>
-        <div class="letterContainer assembly selectableItem"></div>
-        <div class="letterContainer assembly selectableItem"></div>
-        <div class="letterContainer assembly selectableItem"></div>
-        <div class="letterContainer assembly selectableItem"></div>
-        <div class="letterContainer assembly selectableItem"></div>
-        <div class="letterContainer assembly selectableItem"></div>
-        <div class="letterContainer assembly selectableItem"></div>
-    </div>
-    <div id="buttonWrapper">
-        <input type="button" id="submitButton" value="Submit">
-    </div>
-    <div id="assemblyFiller"></div>
-    <div id="storageLabel">
-        Storage
-    </div>
-    <div id="extras">
-        <div class="letterContainer stash selectableItem"></div>
-        <div class="letterContainer stash selectableItem"></div>
-        <div class="letterContainer stash selectableItem"></div>
-        <div class="letterContainer stash selectableItem"></div>
-        <div id="score">
-            <table>
-                <tr>
-                    <td>Score</td>
-                    <td id="scoreContainer">0</td>
-                </tr>
-                <tr>
-                    <td>High Score</td>
-                    <td id="highScoreContainer">0</td>
-                </tr>
-            </table>
+    <div id="letterStorage">
+        <div id="storage">
+            <div class="letterContainer"></div>
+            <div class="letterContainer"></div>
+            <div class="letterContainer"></div>
+            <div class="letterContainer"></div>
+            <div id="storageLabel">
+                Storage
+            </div>
         </div>
     </div>
-    <div id="displayText"></div>
+    <div id="letterAssembly">
+        <div class="letterContainer"></div>
+        <div class="letterContainer"></div>
+        <div class="letterContainer"></div>
+        <div class="letterContainer"></div>
+        <div class="letterContainer"></div>
+        <div class="letterContainer"></div>
+        <div class="letterContainer"></div>
+        <div class="letterContainer"></div>
+        <button id="submitButton">Submit</button>
+    </div>
+    <div id="footer">
+        <table>
+            <tr>
+                <td>Score</td>
+                <td>0</td>
+            </tr>
+            <tr>
+                <td>High Score</td>
+                <td>0</td>
+            </tr>
+        </table>
+    </div>
 </body>
 
 </html>

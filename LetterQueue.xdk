@@ -6,7 +6,7 @@
       "projectTypeName": "com.intel.xdk.projecttype.jsapp",
       "src": "",
       "projectGuid": "4208571b-5494-4540-9e05-2d8c4707a1a1",
-      "lastModifiedDate": 1420947760596,
+      "lastModifiedDate": 1421806077461,
       "creationDate": 1420142094394
     },
     "sourceDirectory": "",
@@ -32,18 +32,22 @@
     ],
     "cordovaPlugins": [
       {
-        "id": "org.apache.cordova.device",
-        "version": "0.2.5",
-        "selectedState": "Auto",
+        "id": "org.apache.cordova.dialogs",
+        "version": "0.2.6",
+        "selectedState": "Included",
         "data": {},
         "paramvals": {}
       },
       {
-        "id": "org.apache.cordova.splashscreen",
-        "version": "0.2.5",
-        "selectedState": "Auto",
+        "id": "com.rjfun.cordova.plugin.admob",
+        "version": "",
+        "selectedState": "Included",
         "data": {},
-        "paramvals": {}
+        "paramvals": {},
+        "custom": "true",
+        "name": "Admob (floatinghotpot)",
+        "origin": "https://github.com/floatinghotpot/cordova-plugin-admob.git",
+        "originType": "repo"
       }
     ],
     "serviceMethods": [],
@@ -66,7 +70,7 @@
         "addlPermissions_": "",
         "excludedLibraries_": "",
         "cordovaCLIVersion_": "3.3",
-        "appVersion_": "0.0.1",
+        "appVersion_": "0.0.2",
         "appVersionCode_": "1",
         "crosswalkVersion_": "stable"
       },
@@ -90,7 +94,7 @@
         "addlPermissions_": "",
         "excludedLibraries_": "",
         "cordovaCLIVersion_": "3.3",
-        "appVersion_": "0.0.2",
+        "appVersion_": "0.1.0",
         "appVersionCode_": "1",
         "crosswalkVersion_": "stable",
         "appDescription_": "This app is still in development.",

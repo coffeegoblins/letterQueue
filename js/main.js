@@ -1,283 +1,275 @@
-require.nodeRequire = window.requireNode;
-
-require.config(
-{
-    baseUrl: '',
-    shim:
-    {},
-    paths:
-    {
-        text: 'lib/text',
-        jsonLoader: 'core/src/functions/loadRemoteJSON'
-    }
-});
-
-require(['js/configuration', 'js/inputBlocker', 'js/wordLogic', 'js/animation'],
-    function (Configuration, InputBlocker, WordLogic, Animation)
+define(['js/adMob', 'js/configuration', 'js/inputBlocker', 'js/wordLogic', 'js/animation'],
+    function (AdMob, Configuration, InputBlocker, WordLogic, Animation)
     {
         'use strict';
 
-        var totalScore = 0;
-        var highScoreContainer;
-        var scoreContainer;
-        var nextLetterContainer;
-        var letterContainers;
-        var selectableItems;
-
-        window.addEventListener('error', function (e)
-        {
-            if (e.error)
+        return {
+            initialize: function ()
             {
-                console.log(e.error.message);
-                console.log(e.error.stack);
-            }
-        });
+                this.subscriptions = {};
+                this.selectableItems = document.getElementsByClassName('selectableItem');
+                this.nextLetterContainer = document.getElementById('nextletterContainer');
+                this.letterContainers = document.getElementsByClassName('letterContainer');
+                this.letterPreviews = document.getElementsByClassName('previewContainer');
+                this.restartButton = document.getElementById('restartButton');
+                this.submitButton = document.getElementById('submitButton');
+                this.scoreContainer = document.getElementById('scoreContainer');
+                this.highScoreContainer = document.getElementById('highScoreContainer');
+                this.totalScore = 0;
 
-        function onDocumentReady()
-        {
-            selectableItems = document.getElementsByClassName('selectableItem');
-            nextLetterContainer = document.getElementById('nextletterContainer');
+                // this.highScoreContainer.innerHTML = localStorage.getItem('highScore') || 0;
 
-            letterContainers = document.getElementsByClassName('letterContainer');
-            for (i = 0; i < letterContainers.length; ++i)
+//                for (var i = 0; i < this.letterContainers.length; ++i)
+//                {
+//                    var letterContainer = this.letterContainers[i];
+//                    this.setCalculatedLetterSize(letterContainer);
+//                    letterContainer.addEventListener('click', this.onLetterContainerClicked.bind(this));
+//
+//                    var style = window.getComputedStyle(letterContainer);
+//                    letterContainer.style.opacity = style.opacity;
+//                }
+//
+//                for (i = this.letterPreviews.length - 1; i >= 0; --i)
+//                {
+//                    var letterPreview = this.letterPreviews[i];
+//                    this.insertLetter(letterPreview);
+//                }
+//
+//                this.restartButton.addEventListener('click', this.onRestartButtonClicked.bind(this));
+//                this.submitButton.addEventListener('click', this.onSubmitButtonClicked.bind(this));
+//
+//                document.body.addEventListener('click', this.onBodyClicked.bind(this));
+//                this.onBodyClicked();
+//
+//                document.body.onresize = this.onResize.bind(this);
+//                this.onResize();
+            },
+
+            on: function (event, callback, context)
             {
-                var letterContainer = letterContainers[i];
-                setCalculatedLetterSize(letterContainer);
-                letterContainer.addEventListener('click', onLetterContainerClicked);
-
-                var style = window.getComputedStyle(letterContainer);
-                letterContainer.style.opacity = style.opacity;
-            }
-
-            var letterPreviews = document.getElementsByClassName('previewContainer');
-            for (var i = 0; i < letterPreviews.length; ++i)
-            {
-                var letterPreview = letterPreviews[i];
-                insertLetter(letterPreview);
-            }
-
-            document.body.onresize = onResize;
-
-            var restartButton = document.getElementById('restartButton');
-            restartButton.addEventListener('click', onRestartButtonClicked);
-
-            var submitButton = document.getElementById('submitButton');
-            submitButton.addEventListener('click', onSubmitButtonClicked);
-
-            onResize();
-            selectContainer(nextLetterContainer);
-
-            document.body.addEventListener('click', onBodyClicked);
-
-            scoreContainer = document.getElementById('scoreContainer');
-            highScoreContainer = document.getElementById('highScoreContainer');
-            highScoreContainer.innerHTML = localStorage.getItem('highScore') || 0;
-        }
-
-        function onBodyClicked()
-        {
-            selectContainer(nextLetterContainer);
-        }
-
-        function onRestartButtonClicked()
-        {
-            location.reload();
-        }
-
-        function onSubmitButtonClicked()
-        {
-            var word = '';
-            var score = 0;
-            var letterContainers = document.getElementsByClassName('assembly');
-            var containersWithLetters = [];
-            var letters = "";
-
-            for (var i = letterContainers.length - 1; i >= 0; --i)
-            {
-                var letterContainer = letterContainers[i].firstChild;
-                if (letterContainer)
+                if (!this.subscriptions[event])
                 {
-                    var letter = letterContainer.innerHTML[0];
-                    letters += letter.toLowerCase();
-
-                    containersWithLetters.push(letterContainers[i]);
-                    word += letterContainer.innerHTML[0];
-                }
-            }
-
-            if (WordLogic.isValidWord(word))
-            {
-                for (i = 0; i < containersWithLetters.length; ++i)
-                {
-                    var letter2 = containersWithLetters[i].firstChild.innerHTML[0];
-
-                    score += Configuration.letterChoices[letter2].score;
-
-                    fadeElement(containersWithLetters[i], 1000);
+                    this.subscriptions[event] = [];
                 }
 
-                totalScore += score;
-                scoreContainer.innerHTML = totalScore;
-
-                if (totalScore > highScoreContainer.innerHTML)
+                this.subscriptions[event].push(
                 {
-                    highScoreContainer.innerHTML = totalScore;
-                    localStorage.setItem('highScore', totalScore);
+                    callback: callback,
+                    context: context
+                });
+            },
+
+            trigger: function (event)
+            {
+                if (this.subscriptions[event])
+                {
+                    for (var i = 0; i < this.subscriptions[event].length; ++i)
+                    {
+                        var subscription = this.subscriptions[event][i];
+                        subscription.callback.call(subscription.context);
+                    }
+                }
+            },
+
+            onBodyClicked: function ()
+            {
+                this.selectContainer(this.nextLetterContainer);
+            },
+
+            onRestartButtonClicked: function ()
+            {
+                location.reload();
+                this.trigger('restart');
+            },
+
+            onSubmitButtonClicked: function ()
+            {
+                var word = '';
+                var score = 0;
+                var assemblyContainers = document.getElementsByClassName('assembly');
+                var containersWithLetters = [];
+                var letters = "";
+
+                for (var i = assemblyContainers.length - 1; i >= 0; --i)
+                {
+                    var letterContainer = assemblyContainers[i].firstChild;
+                    if (letterContainer)
+                    {
+                        var letter = letterContainer.innerHTML[0];
+                        letters += letter.toLowerCase();
+
+                        containersWithLetters.push(assemblyContainers[i]);
+                        word += letterContainer.innerHTML[0];
+                    }
                 }
 
-                fadeText(document.getElementById('displayText'), score + ' Points!', 1000);
-                //detectGameOver(letters);
-                return;
-            }
-
-            fadeText(document.getElementById('displayText'), 'Invalid word!', 1000);
-        }
-
-        function onLetterContainerClicked(e)
-        {
-            var selectedContainer = document.querySelector('.selected');
-
-            var container = e.currentTarget;
-            if (!container.classList.contains('selectableItem') || container === selectedContainer)
-            {
-                return;
-            }
-
-            if (container.children.length > 0)
-            {
-                // Target is not empty
-
-                if (selectedContainer === nextLetterContainer || container === nextLetterContainer)
+                if (WordLogic.isValidWord(word))
                 {
-                    selectContainer(container);
-                    e.stopPropagation();
+                    for (i = 0; i < containersWithLetters.length; ++i)
+                    {
+                        var letter2 = containersWithLetters[i].firstChild.innerHTML[0];
+
+                        score += Configuration.letterChoices[letter2].score;
+
+                        this.fadeElement(containersWithLetters[i], 1000);
+                    }
+
+                    this.totalScore += score;
+                    this.scoreContainer.innerHTML = this.totalScore;
+
+                    if (this.totalScore > this.highScoreContainer.innerHTML)
+                    {
+                        this.highScoreContainer.innerHTML = this.totalScore;
+                        localStorage.setItem('highScore', this.totalScore);
+                    }
+
+                    this.fadeText(document.getElementById('displayText'), score + 'Points!', 1000);
                     return;
                 }
 
-                swapLetters(selectedContainer, container);
-                return;
-            }
+                this.fadeText(document.getElementById('displayText'), 'Invalid word!', 1000);
+            },
 
-            Animation.moveLetter(selectedContainer, container, 250);
-
-            selectContainer(nextLetterContainer);
-
-            if (nextLetterContainer.innerHTML === '')
+            onLetterContainerClicked: function (e)
             {
-                cycleLetters();
-            }
-        }
+                var selectedContainer = document.querySelector('.selected');
 
-        function swapLetters(container1, container2)
-        {
-            Animation.moveLetter(container1, container2, 250);
-            Animation.moveLetter(container2, container1, 250);
-        }
-
-        function fadeText(div, text, milliseconds)
-        {
-            div.innerHTML = text;
-
-            fadeElement(div, milliseconds);
-        }
-
-        function fadeElement(div, milliseconds)
-        {
-            div.style.opacity = 1;
-
-            var intervalAmount = milliseconds / 10;
-            var intervalOpacity = -1 / intervalAmount;
-
-            var i = 0;
-
-            var fadeInterval = setInterval(function ()
-            {
-                div.style.opacity = parseFloat(div.style.opacity, 10) + intervalOpacity;
-
-                if (i === intervalAmount)
+                var container = e.currentTarget;
+                if (!container.classList.contains('selectableItem') || container === selectedContainer)
                 {
-                    clearInterval(fadeInterval);
-
-                    div.innerHTML = '';
-                    div.style.opacity = 1;
+                    return;
                 }
 
-                ++i;
-            }, 10);
-        }
-
-        function selectContainer(container)
-        {
-            for (var i = 0; i < letterContainers.length; ++i)
-            {
-                letterContainers[i].classList.remove('selected');
-            }
-
-            container.classList.add('selected');
-        }
-
-        function cycleLetters()
-        {
-            var letterPreviews = document.getElementsByClassName('previewContainer');
-            for (var i = 0; i < letterPreviews.length - 1; ++i)
-            {
-                Animation.moveLetter(letterPreviews[i + 1], letterPreviews[i], 200);
-            }
-
-            insertLetter(letterPreviews[letterPreviews.length - 1]);
-            //onResize();
-        }
-
-        function onResize()
-        {
-            setCalculatedLetterSize(restartButton);
-
-            for (var i = 0; i < letterContainers.length; ++i)
-            {
-                var letterContainer = letterContainers[i];
-                if (letterContainer)
+                if (container.children.length > 0)
                 {
-                    setCalculatedLetterSize(letterContainer);
+                    // Target is not empty
+
+                    if (selectedContainer === this.nextLetterContainer || container === this.nextLetterContainer)
+                    {
+                        this.selectContainer(container);
+                        e.stopPropagation();
+                        return;
+                    }
+
+                    this.swapLetters(selectedContainer, container);
+                    return;
+                }
+
+                Animation.moveLetter(selectedContainer, container, 250);
+
+                this.selectContainer(this.nextLetterContainer);
+
+                if (this.nextLetterContainer.innerHTML === '')
+                {
+                    this.cycleLetters();
+                }
+            },
+
+            swapLetters: function (container1, container2)
+            {
+                Animation.moveLetter(container1, container2, 250);
+                Animation.moveLetter(container2, container1, 250);
+            },
+
+            fadeText: function (div, text, milliseconds)
+            {
+                div.innerHTML = text;
+                this.fadeElement(div, milliseconds);
+            },
+
+            fadeElement: function (div, milliseconds)
+            {
+                div.style.opacity = 1;
+
+                var intervalAmount = milliseconds / 10;
+                var intervalOpacity = -1 / intervalAmount;
+
+                var i = 0;
+
+                var fadeInterval = setInterval(function ()
+                {
+                    div.style.opacity = parseFloat(div.style.opacity, 10) + intervalOpacity;
+
+                    if (i === intervalAmount)
+                    {
+                        clearInterval(fadeInterval);
+
+                        div.innerHTML = '';
+                        div.style.opacity = 1;
+                    }
+
+                    ++i;
+                }, 10);
+            },
+
+            selectContainer: function (container)
+            {
+                for (var i = 0; i < this.letterContainers.length; ++i)
+                {
+                    this.letterContainers[i].classList.remove('selected');
+                }
+
+                container.classList.add('selected');
+            },
+
+            cycleLetters: function ()
+            {
+                var letterPreviews = document.getElementsByClassName('previewContainer');
+
+                for (var i = 0; i < letterPreviews.length - 1; ++i)
+                {
+                    Animation.moveLetter(letterPreviews[i + 1], letterPreviews[i], 200);
+                }
+
+                this.insertLetter(letterPreviews[letterPreviews.length - 1]);
+            },
+
+            onResize: function ()
+            {
+                this.setCalculatedLetterSize(this.restartButton);
+
+                for (var i = 0; i < this.letterContainers.length; ++i)
+                {
+                    var letterContainer = this.letterContainers[i];
+                    if (letterContainer)
+                    {
+                        this.setCalculatedLetterSize(letterContainer);
+                    }
+                }
+
+                var displayText = document.getElementById('displayText');
+                this.setCalculatedLetterSize(displayText);
+            },
+
+            setCalculatedLetterSize: function (element)
+            {
+//                element.style.fontSize = element.offsetHeight / 2 + 'px';
+            },
+
+            insertLetter: function (div)
+            {
+                var letter = this.getRandomLetter();
+
+                var letterDiv = document.createElement('div');
+                letterDiv.innerHTML = letter + '<sub>' + Configuration.letterChoices[letter].score + '</sub>';
+                letterDiv.classList.add('letterPreview');
+                letterDiv.classList.add('letter');
+
+                div.appendChild(letterDiv);
+            },
+
+            getRandomLetter: function ()
+            {
+                var randomNumber = Math.floor(Math.random() * Configuration.weightedTotal);
+
+                for (var letterChoice in Configuration.letterChoices)
+                {
+                    randomNumber -= Configuration.letterChoices[letterChoice].count;
+                    if (randomNumber <= 0)
+                    {
+                        return letterChoice;
+                    }
                 }
             }
-
-            var displayText = document.getElementById('displayText');
-            setCalculatedLetterSize(displayText);
-        }
-
-        function setCalculatedLetterSize(element)
-        {
-            element.style.fontSize = element.offsetHeight / 2 + 'px';
-        }
-
-        function insertLetter(div)
-        {
-            var letter = getRandomLetter();
-
-            var letterDiv = document.createElement('div');
-            letterDiv.innerHTML = letter + '<sub>' + Configuration.letterChoices[letter].score + '</sub>';
-            letterDiv.classList.add('letterPreview');
-            letterDiv.classList.add('letter');
-
-            div.appendChild(letterDiv);
-        }
-
-        function getRandomLetter()
-        {
-            var randomNumber = Math.floor(Math.random() * Configuration.weightedTotal);
-
-            for (var letterChoice in Configuration.letterChoices)
-            {
-                randomNumber -= Configuration.letterChoices[letterChoice].count;
-                if (randomNumber <= 0)
-                {
-                    return letterChoice;
-                }
-            }
-        }
-
-        if (document.readyState === 'complete')
-            onDocumentReady();
-        else
-            window.addEventListener('load', onDocumentReady, false);
+        };
     });
