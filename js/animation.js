@@ -1,90 +1,77 @@
-define(['./inputBlocker'], function (InputBlocker)
+define(['js/selectionManager', 'js/inputBlocker', 'js/transitionAnimation', 'js/bobbingAnimation'], function (SelectionManager, InputBlocker, TransitionAnimation, BobbingAnimation)
 {
-    'use strict';
-
-    function getPosition(element)
+    function Animation()
     {
-        var xPosition = 0;
-        var yPosition = 0;
-
-        while (element)
-        {
-            xPosition += (element.offsetLeft - element.scrollLeft + element.clientLeft);
-            yPosition += (element.offsetTop - element.scrollTop + element.clientTop);
-            element = element.offsetParent;
-        }
-
-        return {
-            x: xPosition,
-            y: yPosition
-        };
+        this.activeAnimations = [];
+        SelectionManager.on("letterSelected", this.onLetterSelected.bind(this));
+        SelectionManager.on("selectionReleased", this.removeAnimations.bind(this));
     }
 
-    return {
-        moveLetter: function (sourceContainer, targetContainer, milliseconds, callback)
+    Animation.prototype.onLetterSelected = function (letter)
+    {
+        this.bobLetter(letter, 350);
+    };
+
+    Animation.prototype.removeAnimations = function (letter)
+    {
+        for (var i = 0; i < this.activeAnimations.length; ++i)
         {
-            InputBlocker.enable();
-
-            var sourcePosition = getPosition(sourceContainer);
-            var targetPosition = getPosition(targetContainer);
-
-            var div = document.createElement('div');
-            div.innerHTML = sourceContainer.innerHTML;
-            div.classList.add('letterContainer');
-            div.classList.add('letterCarrier');
-            div.style.opacity = sourceContainer.style.opacity;
-            div.style.top = sourcePosition.y;
-            div.style.left = sourcePosition.x;
-            div.style.width = sourceContainer.offsetWidth + "px";
-            div.style.minHeight = sourceContainer.offsetHeight + "px";
-            div.style.fontSize = sourceContainer.style.fontSize;
-            div.style.display = 'table';
-
-            sourceContainer.innerHTML = '';
-
-            document.body.appendChild(div);
-
-            var intervalAmount = milliseconds / 10;
-            var intervalX = (targetPosition.x - parseFloat(div.style.left, 10)) / intervalAmount;
-            var intervalY = (targetPosition.y - parseFloat(div.style.top, 10)) / intervalAmount;
-            var intervalHeight = (targetContainer.offsetHeight - sourceContainer.offsetHeight) / intervalAmount;
-            var intervalOpacity = (targetContainer.style.opacity - sourceContainer.style.opacity) / intervalAmount;
-            var intervalFont = (targetContainer.style.fontSize - sourceContainer.style.fontSize) / intervalAmount;
-
-            var i = 0;
-
-            var moveInterval = setInterval(function ()
+            var animation = this.activeAnimations[i];
+            if (animation.targetObject === letter)
             {
-                var floatTop = parseFloat(div.style.top, 10);
-                floatTop += intervalY;
-                div.style.top = floatTop + "px";
-
-                var floatLeft = parseFloat(div.style.left, 10);
-                floatLeft += intervalX;
-                div.style.left = floatLeft + "px";
-
-                div.style.minHeight = parseFloat(div.style.minHeight, 10) + intervalHeight;
-                div.style.opacity = parseFloat(div.style.opacity, 10) + intervalOpacity;
-                div.style.fontSize = parseFloat(div.style.fontSize, 10) + intervalFont;
-
-                if (i === intervalAmount)
+                if (animation.resetValues)
                 {
-                    clearInterval(moveInterval);
-
-                    targetContainer.innerHTML = div.innerHTML;
-                    div.innerHTML = '';
-                    document.body.removeChild(div);
-
-                    InputBlocker.disable();
-
-                    if (callback)
-                    {
-                        callback();
-                    }
+                    animation.resetValues();
                 }
-
-                ++i;
-            }, 10);
+                
+                this.activeAnimations.splice(this.activeAnimations.indexOf(animation), 1);
+                return;
+            }
         }
     };
+
+    Animation.prototype.transition = function (letter, targetValues, timeInMillseconds, callback)
+    {
+        this.removeAnimations(letter);
+        
+        var animation = new TransitionAnimation(letter, targetValues, timeInMillseconds,
+            this.resetValues.bind(this, callback));
+
+        this.activeAnimations.push(animation);
+    };
+
+    Animation.prototype.resetValues = function (callback, animation)
+    {
+        this.activeAnimations.splice(this.activeAnimations.indexOf(animation), 1);
+
+        animation.targetObject.x = animation.targetValues.x;
+        animation.targetObject.y = animation.targetValues.y;
+        animation.targetObject.letterOpacity = animation.targetValues.letterOpacity;
+        animation.targetObject.color.r = animation.targetValues.color.r;
+        animation.targetObject.color.g = animation.targetValues.color.g;
+        animation.targetObject.color.b = animation.targetValues.color.b;
+        animation.targetObject.color.a = animation.targetValues.color.a;
+        animation.targetObject.setScale(animation.targetValues.scaleX, animation.targetValues.scaleY);
+
+        if (callback)
+        {
+            callback();
+        }
+    };
+
+    Animation.prototype.bobLetter = function (letter, timeInMilliseconds)
+    {
+        var animation = new BobbingAnimation(letter, timeInMilliseconds);
+        this.activeAnimations.push(animation);
+    };
+
+    Animation.prototype.update = function (deltaTime)
+    {
+        for (var i = 0; i < this.activeAnimations.length; ++i)
+        {
+            this.activeAnimations[i].update(deltaTime);
+        }
+    };
+
+    return new Animation();
 });

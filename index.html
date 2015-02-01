@@ -5,7 +5,7 @@
     <meta http-equiv="Content-type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0" />
     <link rel="stylesheet" type="text/css" href="styles.css">
-    <script src="cordova.js"></script>
+    <!--     <script src="cordova.js"></script> -->
     <script type="text/javascript" src="lib/require.js"></script>
     <script>
         function onDocumentReady()
@@ -27,9 +27,12 @@
 
             function onDeviceReady()
             {
-                require(['js/main', 'js/adMob'], function (Main, AdMob)
+                require(['js/game', 'js/adMob'], function (Game, AdMob)
                 {
-                    Main.initialize();
+                    var canvas = document.body.firstElementChild;
+                    var context = canvas.getContext('2d');
+                    
+                    Game.initialize(canvas);
 
                     if (AdMob.initialize())
                     {
@@ -39,6 +42,16 @@
                         Main.on('restart', AdMob.showInterstitial, AdMob);
                         Main.on('resume', AdMob.showInterstitial, AdMob);
                     }
+
+                    function render(timeStamp)
+                    {
+                        context.clearRect (0, 0, canvas.width, canvas.height);
+                        Game.render(timeStamp);
+                        window.requestAnimationFrame(render);
+                    }
+
+                    document.body.onresize = Game.onResize;
+                    window.requestAnimationFrame(render);
                 });
             };
         }
@@ -61,49 +74,7 @@
 </head>
 
 <body>
-    <div id="letterQueue">
-        <div class="letterContainer letterPreview1">a</div>
-        <div class="letterContainer letterPreview2">b</div>
-        <div class="letterContainer letterPreview3">c</div>
-        <div class="letterContainer letterPreview4">d</div>
-        <div class="letterContainer letterPreview5">e</div>
-        <div class="letterContainer letterPreview6">f</div>
-        <div class="letterContainer">h</div>
-    </div>
-    <div id="letterStorage">
-        <div id="storage">
-            <div class="letterContainer"></div>
-            <div class="letterContainer"></div>
-            <div class="letterContainer"></div>
-            <div class="letterContainer"></div>
-            <div id="storageLabel">
-                Storage
-            </div>
-        </div>
-    </div>
-    <div id="letterAssembly">
-        <div class="letterContainer"></div>
-        <div class="letterContainer"></div>
-        <div class="letterContainer"></div>
-        <div class="letterContainer"></div>
-        <div class="letterContainer"></div>
-        <div class="letterContainer"></div>
-        <div class="letterContainer"></div>
-        <div class="letterContainer"></div>
-        <button id="submitButton">Submit</button>
-    </div>
-    <div id="footer">
-        <table>
-            <tr>
-                <td>Score</td>
-                <td>0</td>
-            </tr>
-            <tr>
-                <td>High Score</td>
-                <td>0</td>
-            </tr>
-        </table>
-    </div>
+    <canvas width="100%" height="100%"></canvas>
 </body>
 
 </html>

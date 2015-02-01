@@ -1,12 +1,26 @@
-define(['js/adMob', 'js/configuration', 'js/inputBlocker', 'js/wordLogic', 'js/animation'],
-    function (AdMob, Configuration, InputBlocker, WordLogic, Animation)
+define(['js/adMob', 'js/configuration', 'js/inputBlocker', 'js/wordLogic', 'js/animation', 'js/letterQueue', 'js/letterStorage'],
+    function (AdMob, Configuration, InputBlocker, WordLogic, Animation, LetterQueue, LetterStorage)
     {
         'use strict';
 
         return {
-            initialize: function ()
+            initialize: function (canvas)
             {
+                this.previousTimeStamp = 0;
+                this.context = canvas.getContext("2d");
+                this.canvas = canvas;
+                this.canvas.width = window.innerWidth;
+                this.canvas.height = window.innerHeight;
+
+                var letterLength = canvas.clientWidth / 10;
+
+                //                LetterAssembly.initialize(canvas, letterLength);
+                //                LetterStash.initialize(canvas, letterLength);
+                LetterQueue.initialize(letterLength);
+                LetterStorage.initialize(letterLength);
+
                 this.subscriptions = {};
+
                 this.selectableItems = document.getElementsByClassName('selectableItem');
                 this.nextLetterContainer = document.getElementById('nextletterContainer');
                 this.letterContainers = document.getElementsByClassName('letterContainer');
@@ -19,30 +33,46 @@ define(['js/adMob', 'js/configuration', 'js/inputBlocker', 'js/wordLogic', 'js/a
 
                 // this.highScoreContainer.innerHTML = localStorage.getItem('highScore') || 0;
 
-//                for (var i = 0; i < this.letterContainers.length; ++i)
-//                {
-//                    var letterContainer = this.letterContainers[i];
-//                    this.setCalculatedLetterSize(letterContainer);
-//                    letterContainer.addEventListener('click', this.onLetterContainerClicked.bind(this));
-//
-//                    var style = window.getComputedStyle(letterContainer);
-//                    letterContainer.style.opacity = style.opacity;
-//                }
-//
-//                for (i = this.letterPreviews.length - 1; i >= 0; --i)
-//                {
-//                    var letterPreview = this.letterPreviews[i];
-//                    this.insertLetter(letterPreview);
-//                }
-//
-//                this.restartButton.addEventListener('click', this.onRestartButtonClicked.bind(this));
-//                this.submitButton.addEventListener('click', this.onSubmitButtonClicked.bind(this));
-//
-//                document.body.addEventListener('click', this.onBodyClicked.bind(this));
-//                this.onBodyClicked();
-//
-//                document.body.onresize = this.onResize.bind(this);
-//                this.onResize();
+                //                for (var i = 0; i < this.letterContainers.length; ++i)
+                //                {
+                //                    var letterContainer = this.letterContainers[i];
+                //                    this.setCalculatedLetterSize(letterContainer);
+                //                    letterContainer.addEventListener('click', this.onLetterContainerClicked.bind(this));
+                //
+                //                    var style = window.getComputedStyle(letterContainer);
+                //                    letterContainer.style.opacity = style.opacity;
+                //                }
+                //
+                //                for (i = this.letterPreviews.length - 1; i >= 0; --i)
+                //                {
+                //                    var letterPreview = this.letterPreviews[i];
+                //                    this.insertLetter(letterPreview);
+                //                }
+                //
+                //                this.restartButton.addEventListener('click', this.onRestartButtonClicked.bind(this));
+                //                this.submitButton.addEventListener('click', this.onSubmitButtonClicked.bind(this));
+                //
+                //                document.body.addEventListener('click', this.onBodyClicked.bind(this));
+                //                this.onBodyClicked();
+                //
+                //                document.body.onresize = this.onResize.bind(this);
+                //                this.onResize();
+            },
+
+            render: function (timeStamp)
+            {
+                var deltaTime = timeStamp - this.previousTimeStamp;
+
+                Animation.update(deltaTime);
+                LetterStorage.render(this.context, deltaTime);
+                LetterQueue.render(this.context, deltaTime);
+
+                this.previousTimeStamp = timeStamp;
+            },
+
+            onResize: function ()
+            {
+                //                 LetterQueue.onResize();
             },
 
             on: function (event, callback, context)
@@ -224,26 +254,9 @@ define(['js/adMob', 'js/configuration', 'js/inputBlocker', 'js/wordLogic', 'js/a
                 this.insertLetter(letterPreviews[letterPreviews.length - 1]);
             },
 
-            onResize: function ()
-            {
-                this.setCalculatedLetterSize(this.restartButton);
-
-                for (var i = 0; i < this.letterContainers.length; ++i)
-                {
-                    var letterContainer = this.letterContainers[i];
-                    if (letterContainer)
-                    {
-                        this.setCalculatedLetterSize(letterContainer);
-                    }
-                }
-
-                var displayText = document.getElementById('displayText');
-                this.setCalculatedLetterSize(displayText);
-            },
-
             setCalculatedLetterSize: function (element)
             {
-//                element.style.fontSize = element.offsetHeight / 2 + 'px';
+                //                element.style.fontSize = element.offsetHeight / 2 + 'px';
             },
 
             insertLetter: function (div)
