@@ -6,13 +6,15 @@ define([], function ()
         this.callback = callback;
         this.elapsedTime = 0;
         this.endTime = timeInMilliseconds;
+
         this.targetValues = targetValues;
-        this.targetValues.x = targetValues.x || letter.x;
-        this.targetValues.y = targetValues.y || letter.y;
-        this.targetValues.scaleX = targetValues.scaleX || letter.scaleX;
-        this.targetValues.scaleY = targetValues.scaleY || letter.scaleY;
-        this.targetValues.letterOpacity = targetValues.letterOpacity || letter.letterOpacity;
-        this.targetValues.color = targetValues.color || letter.color;
+        this.targetValues.x = this.selectValue(targetValues.x, letter.x);
+        this.targetValues.y = this.selectValue(targetValues.y, letter.y);
+        this.targetValues.scaleX = this.selectValue(targetValues.scaleX, letter.scaleX);
+        this.targetValues.scaleY = this.selectValue(targetValues.scaleY, letter.scaleY);
+        this.targetValues.letterOpacity = this.selectValue(targetValues.letterOpacity, letter.letterOpacity);
+        this.targetValues.color = this.selectValue(targetValues.color, letter.color);
+
         this.deltaX = targetValues.x - letter.x;
         this.deltaY = targetValues.y - letter.y;
         this.deltaScaleX = targetValues.scaleX - letter.scaleX;
@@ -26,12 +28,19 @@ define([], function ()
         };
     }
 
-    TransitionAnimation.prototype.update = function (deltaTime)
+    // This function is necessary since 0 is falsey and the target values can be zero
+    TransitionAnimation.prototype.selectValue = function (targetValue, letterValue)
     {
-        this.elapsedTime += deltaTime;
+        if (targetValue !== null && targetValue !== undefined)
+        {
+            return targetValue;
+        }
 
-        var incrementAmount = deltaTime / this.endTime;
+        return letterValue;
+    };
 
+    TransitionAnimation.prototype.update = function (incrementAmount)
+    {
         this.targetObject.x += this.deltaX * incrementAmount;
         this.targetObject.y += this.deltaY * incrementAmount;
         this.targetObject.letterOpacity += this.deltaOpacity * incrementAmount;
@@ -42,13 +51,23 @@ define([], function ()
 
         this.targetObject.setScale(this.targetObject.scaleX + this.deltaScaleX * incrementAmount,
             this.targetObject.scaleY + this.deltaScaleY * incrementAmount);
+    };
 
-        if (this.elapsedTime >= this.endTime)
+    TransitionAnimation.prototype.finish = function ()
+    {
+        this.targetObject.x = this.targetValues.x;
+        this.targetObject.y = this.targetValues.y;
+        this.targetObject.letterOpacity = this.targetValues.letterOpacity;
+        this.targetObject.color.r = this.targetValues.color.r;
+        this.targetObject.color.g = this.targetValues.color.g;
+        this.targetObject.color.b = this.targetValues.color.b;
+        this.targetObject.color.a = this.targetValues.color.a;
+
+        this.targetObject.setScale(this.targetValues.scaleX, this.targetValues.scaleY);
+
+        if (this.callback)
         {
-            if (this.callback)
-            {
-                this.callback(this);
-            }
+            this.callback();
         }
     };
 

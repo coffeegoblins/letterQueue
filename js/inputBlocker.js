@@ -4,21 +4,21 @@ define([], function ()
 
     function InputBlocker()
     {
-        window.addEventListener('contextmenu', this.preventDefault, false);
-        window.addEventListener('MSHoldVisual', this.preventDefault, false);
-        window.addEventListener('selectstart', this.preventDefault, false);
-        window.addEventListener('wheel', this.preventDefault, false);
-        window.addEventListener('mousedown', this.preventDefault, false);
-        window.addEventListener('mousemove', this.preventDefault, false);
-        window.addEventListener('mouseup', this.preventDefault, false);
-        window.addEventListener('blur', this.preventDefault, false);
+        window.addEventListener('contextmenu', this.preventDefault.bind(this), false);
+        window.addEventListener('MSHoldVisual', this.preventDefault.bind(this), false);
+        window.addEventListener('selectstart', this.preventDefault.bind(this), false);
+        window.addEventListener('wheel', this.preventDefault.bind(this), false);
+        window.addEventListener('mousedown', this.preventDefault.bind(this), false);
+        window.addEventListener('mousemove', this.preventDefault.bind(this), false);
+        window.addEventListener('mouseup', this.preventDefault.bind(this), false);
+        window.addEventListener('blur', this.preventDefault.bind(this), false);
 
         if (('ontouchstart' in window) || ('onmsgesturechange' in window))
         {
-            window.addEventListener('touchstart', this.preventDefault, false);
-            window.addEventListener('touchmove', this.preventDefault, false);
-            window.addEventListener('touchend', this.preventDefault, false);
-            window.addEventListener('touchcancel', this.preventDefault, false);
+            window.addEventListener('touchstart', this.preventDefault.bind(this), false);
+            window.addEventListener('touchmove', this.preventDefault.bind(this), false);
+            window.addEventListener('touchend', this.preventDefault.bind(this), false);
+            window.addEventListener('touchcancel', this.preventDefault.bind(this), false);
             document.body.style.msTouchAction = 'none';
         }
     }

@@ -1,4 +1,4 @@
-define(['js/letterContainer', 'js/selectionManager'], function (LetterContainer, SelectionManager)
+define(['js/letterContainer'], function (LetterContainer)
 {
     return {
         letterContainers: [],

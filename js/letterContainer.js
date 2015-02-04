@@ -1,4 +1,4 @@
-define(['js/selectionManager', 'js/inputBlocker', 'js/letterQueue', 'js/animation'], function (SelectionManager, InputBlocker, LetterQueue, Animation)
+define(['js/selectionManager', 'js/inputBlocker', 'js/letterQueue', 'js/animationManager', 'js/transitionAnimation'], function (SelectionManager, InputBlocker, LetterQueue, AnimationManager, TransitionAnimation)
 {
     function LetterContainer(letterLength)
     {
@@ -35,12 +35,18 @@ define(['js/selectionManager', 'js/inputBlocker', 'js/letterQueue', 'js/animatio
     LetterContainer.prototype.onClick = function ()
     {
         var selectedLetter = SelectionManager.selectedLetter;
-        var selectedContainer = selectedLetter.container;
+        if (!selectedLetter)
+        {
+            return;
+        }
 
+        var selectedContainer = selectedLetter.container;
         if (selectedContainer === this)
         {
             return;
         }
+
+        SelectionManager.releaseSelection();
 
         if (!this.letter)
         {
@@ -57,7 +63,8 @@ define(['js/selectionManager', 'js/inputBlocker', 'js/letterQueue', 'js/animatio
 
                 // The source is the letter queue
                 LetterQueue.letters.pop();
-                LetterQueue.cycleLetters(function () {
+                LetterQueue.cycleLetters(function ()
+                {
                     LetterQueue.selectNextLetter();
                 });
             });
@@ -89,7 +96,7 @@ define(['js/selectionManager', 'js/inputBlocker', 'js/letterQueue', 'js/animatio
     LetterContainer.prototype.onSwapCompleted = function ()
     {
         this.swapCount++;
-        
+
         if (this.swapCount === 2)
         {
             LetterQueue.selectNextLetter();
@@ -103,11 +110,13 @@ define(['js/selectionManager', 'js/inputBlocker', 'js/letterQueue', 'js/animatio
         this.letter = letter;
         this.letter.container = this;
 
-        Animation.transition(letter,
+        var transitionAnimation = new TransitionAnimation(letter,
         {
             x: this.x,
             y: this.y
         }, 200, this.onLetterPlaced.bind(this, callback));
+
+        AnimationManager.addAnimation(transitionAnimation);
     };
 
     LetterContainer.prototype.onLetterPlaced = function (callback)

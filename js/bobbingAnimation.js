@@ -1,10 +1,11 @@
 define([], function ()
 {
-    function BobAnimation(letter, timeInMilliseconds)
+    function BobAnimation(letter, timeInMillseconds)
     {
         this.targetObject = letter;
         this.originalY = this.targetObject.y;
-        this.endTime = timeInMilliseconds;
+        this.elapsedTime = 0;
+        this.intervalTime = timeInMillseconds;
 
         this.currentThreshold = 0;
         this.lowerThreshold = -10;
@@ -18,13 +19,11 @@ define([], function ()
         this.targetObject.y = this.originalY;
     };
 
-    BobAnimation.prototype.update = function (deltaTime)
+    BobAnimation.prototype.update = function (incrementAmount)
     {
-        this.elapsedTime += deltaTime;
+        var modifiedIncrementAmount = incrementAmount * this.incrementDirection * this.deltaThreshold;
 
-        var incrementAmount = deltaTime / this.endTime * this.incrementDirection * this.deltaThreshold;
-
-        this.currentThreshold += incrementAmount;
+        this.currentThreshold += modifiedIncrementAmount;
 
         if (this.currentThreshold >= this.upperThreshold)
         {

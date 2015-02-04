@@ -1,8 +1,8 @@
-define(['js/letter', 'js/configuration', 'js/animation', 'js/selectionManager'], function (Letter, Configuration, Animation, SelectionManager)
+define(['js/letter', 'js/configuration', 'js/animationManager', 'js/selectionManager', 'js/transitionAnimation', 'js/batchAnimation'], function (Letter, Configuration, AnimationManager, SelectionManager, TransitionAnimation, BatchAnimation)
 {
     return {
         margin: 5,
-        transitionTime: 1000,
+        transitionTime: 200,
         totalTime: 0,
         letters: [],
         maxLetters: 8,
@@ -13,12 +13,49 @@ define(['js/letter', 'js/configuration', 'js/animation', 'js/selectionManager'],
         {
             this.onResize(letterLength);
 
-            for (var i = 0; i < this.maxLetters; ++i)
+            this.cycleLetters();
+
+            SelectionManager.on("bodySelected", this.selectNextLetter.bind(this));
+        },
+
+        cycleLetters: function ()
+        {
+            var startPosition = this.targetValues[0];
+            var letterValue = this.getRandomLetter();
+
+            var letter = new Letter(this.letterLength);
+            letter.x = startPosition.x;
+            letter.y = startPosition.y;
+            letter.color.r = startPosition.color.r;
+            letter.color.g = startPosition.color.g;
+            letter.color.b = startPosition.color.b;
+            letter.color.a = 0;
+            letter.setScale(0, 0);
+            letter.letterOpacity = 0;
+            letter.letterValue = letterValue;
+            letter.score = Configuration.letterChoices[letterValue].score;
+
+            this.letters.unshift(letter);
+
+            var animations = [];
+
+            for (var i = 0; i < this.letters.length; ++i)
             {
-                this.cycleLetters();
+                animations.push(new TransitionAnimation(this.letters[i], this.targetValues[i]));
             }
 
-            SelectionManager.on("bodySelected", this.selectNextLetter.bind(this))
+            AnimationManager.batchAnimations(animations, 200, this.onLettersCycled.bind(this));
+        },
+
+        onLettersCycled: function ()
+        {
+            if (this.letters.length < this.maxLetters)
+            {
+                this.cycleLetters();
+                return;
+            }
+
+            this.selectNextLetter();
         },
 
         selectNextLetter: function ()
@@ -190,45 +227,6 @@ define(['js/letter', 'js/configuration', 'js/animation', 'js/selectionManager'],
                 {
                     return letterChoice;
                 }
-            }
-        },
-
-        cycleLetters: function (callback)
-        {
-            if (this.animationReferenceCount > 0)
-            {
-                // We are currently animating, so queue up the animation for later
-                this.cycleLettersQueue.push(1);
-                return;
-            }
-
-            var startPosition = this.targetValues[0];
-            var letterValue = this.getRandomLetter();
-
-            var letter = new Letter(this.letterLength);
-            letter.x = startPosition.x;
-            letter.y = startPosition.y;
-            letter.color.r = startPosition.color.r;
-            letter.color.g = startPosition.color.g;
-            letter.color.b = startPosition.color.b;
-            letter.color.a = 0;
-            letter.setScale(0, 0);
-            letter.letterOpacity = 0;
-            letter.letterValue = letterValue;
-            letter.score = Configuration.letterChoices[letterValue].score;
-
-            this.letters.unshift(letter);
-
-            if (this.letters.length > this.maxLetters)
-            {
-                this.letters.pop();
-            }
-
-            this.animationReferenceCount = this.letters.length;
-
-            for (var i = 0; i < this.letters.length; ++i)
-            {
-                Animation.transition(this.letters[i], this.targetValues[i], 200, this.letterTransitionComplete.bind(this, callback));
             }
         }
     };

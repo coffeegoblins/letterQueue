@@ -1,76 +1,76 @@
 <html>
 
 <head>
-    <title>Letter Queue</title>
-    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0" />
-    <link rel="stylesheet" type="text/css" href="styles.css">
-    <!--     <script src="cordova.js"></script> -->
-    <script type="text/javascript" src="lib/require.js"></script>
-    <script>
-        function onDocumentReady()
+<title>Letter Queue</title>
+<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0" />
+<link rel="stylesheet" type="text/css" href="styles.css">
+<!--     <script src="cordova.js"></script> -->
+<script type="text/javascript" src="lib/require.js"></script>
+<script>
+    function onDocumentReady()
+    {
+        require.nodeRequire = window.requireNode;
+        require.config(
         {
-            require.nodeRequire = window.requireNode;
-            require.config(
+            baseUrl: '',
+            paths:
             {
-                baseUrl: '',
-                paths:
-                {
-                    text: 'lib/text'
-                }
-            });
-
-            if (document.URL.match(/^https?:/))
-                onDeviceReady();
-            else
-                document.addEventListener('deviceready', onDeviceReady, false);
-
-            function onDeviceReady()
-            {
-                require(['js/game', 'js/adMob'], function (Game, AdMob)
-                {
-                    var canvas = document.body.firstElementChild;
-                    var context = canvas.getContext('2d');
-                    
-                    Game.initialize(canvas);
-
-                    if (AdMob.initialize())
-                    {
-                        AdMob.showBanner();
-                        AdMob.showInterstitial();
-
-                        Main.on('restart', AdMob.showInterstitial, AdMob);
-                        Main.on('resume', AdMob.showInterstitial, AdMob);
-                    }
-
-                    function render(timeStamp)
-                    {
-                        context.clearRect (0, 0, canvas.width, canvas.height);
-                        Game.render(timeStamp);
-                        window.requestAnimationFrame(render);
-                    }
-
-                    document.body.onresize = Game.onResize;
-                    window.requestAnimationFrame(render);
-                });
-            };
-        }
-
-        if (document.readyState === 'complete')
-            onDocumentReady();
-        else
-            window.addEventListener('load', onDocumentReady, false);
-
-        window.addEventListener('error', function (e)
-        {
-            if (e.error)
-            {
-                // TODO Remove
-                alert(e.error.message);
-                alert(e.error.stack);
+                text: 'lib/text'
             }
         });
-    </script>
+
+        if (document.URL.match(/^https?:/))
+            onDeviceReady();
+        else
+            document.addEventListener('deviceready', onDeviceReady, false);
+
+        function onDeviceReady()
+        {
+            require(['js/game', 'js/adMob'], function (Game, AdMob)
+            {
+                var canvas = document.body.firstElementChild;
+                var context = canvas.getContext('2d');
+
+                Game.initialize(canvas);
+
+                if (AdMob.initialize())
+                {
+                    AdMob.showBanner();
+                    AdMob.showInterstitial();
+
+                    Main.on('restart', AdMob.showInterstitial, AdMob);
+                    Main.on('resume', AdMob.showInterstitial, AdMob);
+                }
+
+                function render(timeStamp)
+                {
+                    context.clearRect(0, 0, canvas.width, canvas.height);
+                    Game.render(timeStamp);
+                    window.requestAnimationFrame(render);
+                }
+
+                document.body.onresize = Game.onResize;
+                window.requestAnimationFrame(render);
+            });
+        };
+    }
+
+    if (document.readyState === 'complete')
+        onDocumentReady();
+    else
+        window.addEventListener('load', onDocumentReady, false);
+
+    window.addEventListener('error', function (e)
+    {
+        if (e.error)
+        {
+            // TODO Remove
+            alert(e.error.message);
+            alert(e.error.stack);
+        }
+    });
+</script>
 </head>
 
 <body>

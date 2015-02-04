@@ -1,5 +1,5 @@
-define(['js/adMob', 'js/configuration', 'js/inputBlocker', 'js/wordLogic', 'js/animation', 'js/letterQueue', 'js/letterStorage'],
-    function (AdMob, Configuration, InputBlocker, WordLogic, Animation, LetterQueue, LetterStorage)
+define(['js/adMob', 'js/configuration', 'js/inputBlocker', 'js/wordLogic', 'js/animationManager', 'js/letterQueue', 'js/letterStorage', 'js/letterAssembly'],
+    function (AdMob, Configuration, InputBlocker, WordLogic, AnimationManager, LetterQueue, LetterStorage, LetterAssembly)
     {
         'use strict';
 
@@ -18,6 +18,7 @@ define(['js/adMob', 'js/configuration', 'js/inputBlocker', 'js/wordLogic', 'js/a
                 //                LetterStash.initialize(canvas, letterLength);
                 LetterQueue.initialize(letterLength);
                 LetterStorage.initialize(letterLength);
+                LetterAssembly.initialize(letterLength);
 
                 this.subscriptions = {};
 
@@ -63,8 +64,9 @@ define(['js/adMob', 'js/configuration', 'js/inputBlocker', 'js/wordLogic', 'js/a
             {
                 var deltaTime = timeStamp - this.previousTimeStamp;
 
-                Animation.update(deltaTime);
+                AnimationManager.update(deltaTime);
                 LetterStorage.render(this.context, deltaTime);
+                LetterAssembly.render(this.context, deltaTime);
                 LetterQueue.render(this.context, deltaTime);
 
                 this.previousTimeStamp = timeStamp;
@@ -185,7 +187,7 @@ define(['js/adMob', 'js/configuration', 'js/inputBlocker', 'js/wordLogic', 'js/a
                     return;
                 }
 
-                Animation.moveLetter(selectedContainer, container, 250);
+                AnimationManager.moveLetter(selectedContainer, container, 250);
 
                 this.selectContainer(this.nextLetterContainer);
 
@@ -197,8 +199,8 @@ define(['js/adMob', 'js/configuration', 'js/inputBlocker', 'js/wordLogic', 'js/a
 
             swapLetters: function (container1, container2)
             {
-                Animation.moveLetter(container1, container2, 250);
-                Animation.moveLetter(container2, container1, 250);
+                AnimationManager.moveLetter(container1, container2, 250);
+                AnimationManager.moveLetter(container2, container1, 250);
             },
 
             fadeText: function (div, text, milliseconds)
@@ -248,7 +250,7 @@ define(['js/adMob', 'js/configuration', 'js/inputBlocker', 'js/wordLogic', 'js/a
 
                 for (var i = 0; i < letterPreviews.length - 1; ++i)
                 {
-                    Animation.moveLetter(letterPreviews[i + 1], letterPreviews[i], 200);
+                    AnimationManager.moveLetter(letterPreviews[i + 1], letterPreviews[i], 200);
                 }
 
                 this.insertLetter(letterPreviews[letterPreviews.length - 1]);

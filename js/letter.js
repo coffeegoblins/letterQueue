@@ -31,14 +31,14 @@ define([], function ()
     Letter.prototype.render = function (context, deltaTime)
     {
         // Background
-        context.fillStyle = "rgba(" + Math.floor(this.color.r) + ", " + Math.floor(this.color.g) + ", " + Math.floor(this.color.b) + ", " + Math.floor(this.color.a) + ")";
+        context.fillStyle = "rgba(" + Math.floor(this.color.r) + ", " + Math.floor(this.color.g) + ", " + Math.floor(this.color.b) + ", " + this.color.a + ")";
         context.fillRect(this.x, this.y, this.scaledWidth, this.scaledHeight);
 
         // Letter
         context.font = this.scaledWidth * 0.75 + "px Arial";
-        var marginLeft = (this.scaledWidth - context.measureText(this.letterValue).width) / 2;
         context.fillStyle = "rgba(0, 0, 0, " + this.letterOpacity + ")";
-        context.fillText(this.letterValue, this.x + marginLeft, this.y + this.scaledWidth * 0.75);
+        context.textAlign = "center";
+        context.fillText(this.letterValue, this.x + this.scaledWidth / 2, this.y + this.scaledWidth * 0.75);
 
         // Score
         context.font = this.scaledWidth * 0.2 + "px Arial";
