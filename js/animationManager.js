@@ -72,6 +72,7 @@ define(['js/selectionManager', 'js/inputBlocker', 'js/transitionAnimation', 'js/
     {
         if (animation.isInputBlocking)
         {
+            InputBlocker.enable();
             this.blockingAnimationCount++;
         }
 

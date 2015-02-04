@@ -132,14 +132,16 @@ define(['js/wordLogic', 'js/configuration', 'js/letterContainer', 'js/button', '
                     fadeAnimations.push(new TransitionAnimation(letters[i], fadeTargetValues));
                 }
 
-                var fadeBatch = new BatchAnimation(fadeAnimations, 200, function ()
+                var fadeBatch = new BatchAnimation(fadeAnimations, 1000, function ()
                 {
                     this.clearAssembly();
                 }.bind(this));
 
+                fadeBatch.isInputBlocking = true;
                 AnimationManager.addAnimation(fadeBatch);
             }.bind(this));
 
+            batchAnimation.isInputBlocking = true;
             AnimationManager.addAnimation(batchAnimation);
         },
 
