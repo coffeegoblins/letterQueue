@@ -1,42 +1,49 @@
 define([], function ()
 {
-    function TransitionAnimation(letter, targetValues, timeInMilliseconds, callback)
+    function TransitionAnimation(targetObject, targetValueObject, timeInMilliseconds, callback)
     {
-        this.targetObject = letter;
+        this.targetObject = targetObject;
+        this.targetValueObject = targetValueObject;
         this.callback = callback;
         this.elapsedTime = 0;
         this.endTime = timeInMilliseconds;
+        this.targetValues = {};
 
-        this.targetValues = targetValues;
-        this.targetValues.x = this.selectValue(targetValues.x, letter.x);
-        this.targetValues.y = this.selectValue(targetValues.y, letter.y);
-        this.targetValues.scaleX = this.selectValue(targetValues.scaleX, letter.scaleX);
-        this.targetValues.scaleY = this.selectValue(targetValues.scaleY, letter.scaleY);
-        this.targetValues.letterOpacity = this.selectValue(targetValues.letterOpacity, letter.letterOpacity);
-        this.targetValues.color = this.selectValue(targetValues.color, letter.color);
-
-        this.deltaX = targetValues.x - letter.x;
-        this.deltaY = targetValues.y - letter.y;
-        this.deltaScaleX = targetValues.scaleX - letter.scaleX;
-        this.deltaScaleY = targetValues.scaleY - letter.scaleY;
-        this.deltaOpacity = targetValues.letterOpacity - letter.letterOpacity;
-        this.deltaColor = {
-            r: this.targetValues.color.r - letter.color.r,
-            g: this.targetValues.color.g - letter.color.g,
-            b: this.targetValues.color.b - letter.color.b,
-            a: this.targetValues.color.a - letter.color.a
-        };
+        this.onResize();
     }
 
     // This function is necessary since 0 is falsey and the target values can be zero
-    TransitionAnimation.prototype.selectValue = function (targetValue, letterValue)
+    TransitionAnimation.prototype.selectValue = function (targetValue, targetObjectValue)
     {
         if (targetValue !== null && targetValue !== undefined)
         {
             return targetValue;
         }
 
-        return letterValue;
+        return targetObjectValue;
+    };
+
+    TransitionAnimation.prototype.onResize = function ()
+    {
+        this.elapsedTime = 0;
+        this.targetValues.x = this.selectValue(this.targetValueObject.x, this.targetObject.x);
+        this.targetValues.y = this.selectValue(this.targetValueObject.y, this.targetObject.y);
+        this.targetValues.scaleX = this.selectValue(this.targetValueObject.scaleX, this.targetObject.scaleX);
+        this.targetValues.scaleY = this.selectValue(this.targetValueObject.scaleY, this.targetObject.scaleY);
+        this.targetValues.letterOpacity = this.selectValue(this.targetValueObject.letterOpacity, this.targetObject.letterOpacity);
+        this.targetValues.color = this.selectValue(this.targetValueObject.color, this.targetObject.color);
+
+        this.deltaX = this.targetValues.x - this.targetObject.x;
+        this.deltaY = this.targetValues.y - this.targetObject.y;
+        this.deltaScaleX = this.targetValues.scaleX - this.targetObject.scaleX;
+        this.deltaScaleY = this.targetValues.scaleY - this.targetObject.scaleY;
+        this.deltaOpacity = this.targetValues.letterOpacity - this.targetObject.letterOpacity;
+        this.deltaColor = {
+            r: this.targetValues.color.r - this.targetObject.color.r,
+            g: this.targetValues.color.g - this.targetObject.color.g,
+            b: this.targetValues.color.b - this.targetObject.color.b,
+            a: this.targetValues.color.a - this.targetObject.color.a
+        };
     };
 
     TransitionAnimation.prototype.update = function (incrementAmount)

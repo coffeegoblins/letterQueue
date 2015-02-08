@@ -5,6 +5,8 @@ define([], function ()
         this.score = 1;
         this.x = 0;
         this.y = 0;
+        this.scaleX = 1;
+        this.scaleY = 1;
         this.width = letterLength;
         this.height = letterLength;
         this.setScale(1, 1);
@@ -19,6 +21,14 @@ define([], function ()
         this.deltaColor = null;
         this.deltaOpacity = null;
     }
+
+    Letter.prototype.onResize = function (letterLength)
+    {
+        this.width = letterLength;
+        this.height = letterLength;
+        this.scaledWidth = this.width * this.scaleX;
+        this.scaledHeight = this.height * this.scaleY;
+    };
 
     Letter.prototype.setScale = function (scaleX, scaleY)
     {

@@ -3,20 +3,25 @@ define([], function ()
     function BobAnimation(letter, timeInMillseconds)
     {
         this.targetObject = letter;
-        this.originalY = this.targetObject.y;
         this.elapsedTime = 0;
         this.intervalTime = timeInMillseconds;
-
-        this.currentThreshold = 0;
-        this.lowerThreshold = -10;
-        this.upperThreshold = 10;
-        this.deltaThreshold = this.upperThreshold - this.lowerThreshold;
         this.incrementDirection = 1;
+
+        this.onResize();
     }
 
     BobAnimation.prototype.resetValues = function ()
     {
         this.targetObject.y = this.originalY;
+    };
+
+    BobAnimation.prototype.onResize = function ()
+    {
+        this.currentThreshold = 0;
+        this.originalY = this.targetObject.y;
+        this.lowerThreshold = -this.targetObject.height / 10;
+        this.upperThreshold = this.targetObject.height / 10;
+        this.deltaThreshold = this.upperThreshold - this.lowerThreshold;
     };
 
     BobAnimation.prototype.update = function (incrementAmount)

@@ -1,7 +1,6 @@
 define(['js/letter', 'js/configuration', 'js/animationManager', 'js/selectionManager', 'js/transitionAnimation', 'js/batchAnimation'], function (Letter, Configuration, AnimationManager, SelectionManager, TransitionAnimation, BatchAnimation)
 {
     return {
-        margin: 5,
         transitionTime: 200,
         totalTime: 0,
         letters: [],
@@ -9,13 +8,9 @@ define(['js/letter', 'js/configuration', 'js/animationManager', 'js/selectionMan
         animationReferenceCount: 0,
         cycleLettersQueue: [],
 
-        initialize: function (letterLength)
+        initialize: function ()
         {
-            this.onResize(letterLength);
-
             this.cycleLetters();
-
-            SelectionManager.on("bodySelected", this.selectNextLetter.bind(this));
         },
 
         cycleLetters: function ()
@@ -44,7 +39,7 @@ define(['js/letter', 'js/configuration', 'js/animationManager', 'js/selectionMan
                 animations.push(new TransitionAnimation(this.letters[i], this.targetValues[i]));
             }
 
-            AnimationManager.batchAnimations(animations, 200, this.onLettersCycled.bind(this));
+            AnimationManager.addAnimation(new BatchAnimation(animations, 200, this.onLettersCycled.bind(this)));
         },
 
         onLettersCycled: function ()
@@ -67,8 +62,11 @@ define(['js/letter', 'js/configuration', 'js/animationManager', 'js/selectionMan
             }
         },
 
-        onResize: function (letterLength)
+        onResize: function (canvas)
         {
+            var lengthModifier = (canvas.clientWidth > canvas.clientHeight) ? canvas.clientHeight : canvas.clientWidth;
+            var letterLength = lengthModifier / 10;
+            this.margin = letterLength / 10;
             this.letterLength = letterLength;
 
             this.targetValues = [
@@ -184,6 +182,22 @@ define(['js/letter', 'js/configuration', 'js/animationManager', 'js/selectionMan
                 var previousValue = this.targetValues[i - 1];
 
                 targetValue.x = previousValue.x + previousValue.scaleX * (letterLength / 2) + this.margin;
+            }
+
+            for (i = 0; i < this.letters.length; ++i)
+            {
+                var letter = this.letters[i];
+
+                letter.x = this.targetValues[i].x;
+                letter.y = this.targetValues[i].y;
+                letter.width = letterLength;
+                letter.height = letterLength;
+                letter.letterOpacity = this.targetValues[i].letterOpacity;
+                letter.color.r = this.targetValues[i].color.r;
+                letter.color.g = this.targetValues[i].color.g;
+                letter.color.b = this.targetValues[i].color.b;
+                letter.color.a = this.targetValues[i].color.a;
+                letter.setScale(this.targetValues[i].scaleX, this.targetValues[i].scaleY);
             }
         },
 

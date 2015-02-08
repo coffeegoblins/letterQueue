@@ -39,18 +39,6 @@ define(['js/selectionManager', 'js/inputBlocker', 'js/transitionAnimation', 'js/
         }
     };
 
-    AnimationManager.prototype.transition = function (letter, targetValues, timeInMillseconds, callback)
-    {
-        this.removeAnimations(letter);
-        this.blockingAnimationReferenceCount++;
-        InputBlocker.enable();
-
-        var animation = new TransitionAnimation(letter, targetValues, timeInMillseconds,
-            this.onBlockingAnimationCompleted.bind(this, callback));
-
-        this.activeAnimations.push(animation);
-    };
-
     AnimationManager.prototype.update = function (deltaTime)
     {
         for (var i = 0; i < this.activeAnimations.length; ++i)
@@ -66,6 +54,19 @@ define(['js/selectionManager', 'js/inputBlocker', 'js/transitionAnimation', 'js/
                 this.removeAnimation(animation);
             }
         }
+    };
+
+    AnimationManager.prototype.isLetterAnimating = function (letter)
+    {
+        for (var i = 0; i < this.activeAnimations.length; ++i)
+        {
+            if (this.activeAnimations[i].targetObject === letter)
+            {
+                return true;
+            }
+        }
+
+        return false;
     };
 
     AnimationManager.prototype.addAnimation = function (animation)
@@ -91,6 +92,17 @@ define(['js/selectionManager', 'js/inputBlocker', 'js/transitionAnimation', 'js/
             if (this.blockingAnimationCount === 0)
             {
                 InputBlocker.disable();
+            }
+        }
+    };
+
+    AnimationManager.prototype.onResize = function ()
+    {
+        for (var i = 0; i < this.activeAnimations.length; ++i)
+        {
+            if (this.activeAnimations[i].onResize)
+            {
+                this.activeAnimations[i].onResize();
             }
         }
     };

@@ -1,44 +1,54 @@
-define(['js/wordLogic', 'js/configuration', 'js/letterContainer', 'js/button', 'js/animationManager', 'js/transitionAnimation', 'js/batchAnimation'], function (WordLogic, Configuration, LetterContainer, Button, AnimationManager, TransitionAnimation, BatchAnimation)
+define(['js/wordLogic', 'js/configuration', 'js/letterQueue', 'js/letterContainer', 'js/button', 'js/letterStatistics', 'js/animationManager', 'js/transitionAnimation', 'js/batchAnimation', 'js/selectionManager'], function (WordLogic, Configuration, LetterQueue, LetterContainer, Button, LetterStatistics, AnimationManager, TransitionAnimation, BatchAnimation, SelectionManager)
 {
     return {
-        margin: 10,
         letterContainers: [],
+        currentScore: 0,
+        highScore: 0,
+        bestWord: '',
+        wordsPerMinute: 0,
 
-        initialize: function (letterLength)
+        initialize: function ()
         {
-            this.letterContainers.push(new LetterContainer(letterLength));
-            this.letterContainers.push(new LetterContainer(letterLength));
-            this.letterContainers.push(new LetterContainer(letterLength));
-            this.letterContainers.push(new LetterContainer(letterLength));
-            this.letterContainers.push(new LetterContainer(letterLength));
-            this.letterContainers.push(new LetterContainer(letterLength));
-            this.letterContainers.push(new LetterContainer(letterLength));
-            this.letterContainers.push(new LetterContainer(letterLength));
+            this.letterContainers.push(new LetterContainer());
+            this.letterContainers.push(new LetterContainer());
+            this.letterContainers.push(new LetterContainer());
+            this.letterContainers.push(new LetterContainer());
+            this.letterContainers.push(new LetterContainer());
+            this.letterContainers.push(new LetterContainer());
+            this.letterContainers.push(new LetterContainer());
+            this.letterContainers.push(new LetterContainer());
 
-            this.submitButton = new Button("Submit", 0, 0, letterLength * 2, letterLength, this.onSubmitButtonClicked.bind(this));
+            LetterStatistics.initialize();
 
-            this.onResize(letterLength);
+            this.submitButton = new Button("Submit", this.onSubmitButtonClicked.bind(this));
         },
 
-        onResize: function (letterLength)
+        onResize: function (canvas)
         {
-            this.letterLength = letterLength;
+            var lengthModifier = (canvas.clientWidth > canvas.clientHeight) ? canvas.clientHeight : canvas.clientWidth;
+            this.letterLength = lengthModifier / 10;
+            this.margin = this.letterLength / 10;
 
             var totalMargin = this.letterContainers.length * this.margin;
-            var sideMargin = window.innerWidth - (this.letterContainers.length * letterLength + totalMargin);
+            var sideMargin = window.innerWidth - (this.letterContainers.length * this.letterLength + totalMargin);
             var currentPositionX = sideMargin / 2;
             var currentPositionY = window.innerHeight / 2;
 
+            LetterStatistics.onResize(canvas, this.letterLength, this.margin, currentPositionX, currentPositionY + this.letterLength + this.margin * 2);
+
             for (var i = 0; i < this.letterContainers.length; ++i)
             {
-                this.letterContainers[i].x = currentPositionX;
-                this.letterContainers[i].y = currentPositionY;
+                var letterContainer = this.letterContainers[i];
+                letterContainer.x = currentPositionX;
+                letterContainer.y = currentPositionY;
+                letterContainer.onResize(this.letterLength);
 
-                currentPositionX += letterLength + this.margin;
+                currentPositionX += this.letterLength + this.margin;
             }
 
-            this.submitButton.x = currentPositionX - letterLength * 2 - this.margin;
-            this.submitButton.y = currentPositionY + letterLength + this.margin * 2;
+            this.submitButton.x = currentPositionX - this.letterLength * 2 - this.margin;
+            this.submitButton.y = window.innerHeight / 2 + this.letterLength + this.margin * 2;
+            this.submitButton.onResize(this.letterLength);
         },
 
         render: function (context, deltaTime)
@@ -49,6 +59,8 @@ define(['js/wordLogic', 'js/configuration', 'js/letterContainer', 'js/button', '
             }
 
             this.submitButton.render(context, deltaTime);
+
+            LetterStatistics.render(context);
         },
 
         onSubmitButtonClicked: function ()
@@ -73,22 +85,11 @@ define(['js/wordLogic', 'js/configuration', 'js/letterContainer', 'js/button', '
 
             if (WordLogic.isValidWord(word))
             {
+                SelectionManager.releaseSelection();
                 this.startSuccessAnimation(letters);
-                //                // TODO Animation word and fade
-                //                this.totalScore += score;
-                //
-                //                if (this.totalScore > this.highScoreContainer)
-                //                {
-                //                    this.highScoreContainer.innerHTML = this.totalScore;
-                //                    localStorage.setItem('highScore', this.totalScore);
-                //                }
-                //
-                //                this.fadeText(document.getElementById('displayText'), score + 'Points!', 1000);
-                //                return;
+
+                LetterStatistics.addScore(score, word);
             }
-
-
-            // this.fadeText(document.getElementById('displayText'), 'Invalid word!', 1000);
         },
 
         startSuccessAnimation: function (letters)
@@ -135,6 +136,7 @@ define(['js/wordLogic', 'js/configuration', 'js/letterContainer', 'js/button', '
                 var fadeBatch = new BatchAnimation(fadeAnimations, 1000, function ()
                 {
                     this.clearAssembly();
+                    LetterQueue.selectNextLetter();
                 }.bind(this));
 
                 fadeBatch.isInputBlocking = true;

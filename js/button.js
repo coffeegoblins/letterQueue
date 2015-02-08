@@ -1,11 +1,11 @@
-define(['js/selectionManager', 'js/animationManager'], function (SelectionManager, AnimationManager)
+define(['js/selectionManager'], function (SelectionManager)
 {
-    function Button(text, x, y, width, height, callback)
+    function Button(text, callback)
     {
-        this.x = x;
-        this.y = y;
-        this.width = width;
-        this.height = height;
+        this.x = 0;
+        this.y = 0;
+        this.width = 0;
+        this.height = 0;
         this.text = text;
         this.setScale(1, 1);
         this.callback = callback;
@@ -19,6 +19,13 @@ define(['js/selectionManager', 'js/animationManager'], function (SelectionManage
         this.scaleY = scaleY;
         this.scaledWidth = this.width * scaleX;
         this.scaledHeight = this.height * scaleY;
+    };
+
+    Button.prototype.onResize = function (letterLength)
+    {
+        this.width = letterLength * 2;
+        this.height = letterLength;
+        this.setScale(1, 1);
     };
 
     Button.prototype.onClick = function ()

@@ -4,13 +4,27 @@ define(['js/selectionManager', 'js/inputBlocker', 'js/letterQueue', 'js/animatio
     {
         this.x = 0;
         this.y = 0;
-        this.width = letterLength;
-        this.height = letterLength;
-        this.scaledWidth = this.width;
-        this.scaledHeight = this.height;
+        this.scaleX = 1;
+        this.scaleY = 1;
+        this.onResize(letterLength);
 
         SelectionManager.addClickEventListener(this, this.onClick.bind(this), true);
     }
+
+    LetterContainer.prototype.onResize = function (letterLength)
+    {
+        this.width = letterLength;
+        this.height = letterLength;
+        this.scaledWidth = this.width * this.scaleX;
+        this.scaledHeight = this.height * this.scaleY;
+
+        if (this.letter && !AnimationManager.isLetterAnimating(this.letter))
+        {
+            this.letter.x = this.x;
+            this.letter.y = this.y;
+            this.letter.onResize(letterLength);
+        }
+    };
 
     LetterContainer.prototype.setScale = function (scaleX, scaleY)
     {
@@ -37,50 +51,56 @@ define(['js/selectionManager', 'js/inputBlocker', 'js/letterQueue', 'js/animatio
         var selectedLetter = SelectionManager.selectedLetter;
         if (!selectedLetter)
         {
-            return;
-        }
+            if (this.letter)
+            {
+                SelectionManager.selectLetter(this.letter);
+            }
 
-        var selectedContainer = selectedLetter.container;
-        if (selectedContainer === this)
-        {
             return;
         }
 
         SelectionManager.releaseSelection();
 
-        if (!this.letter)
+        if (selectedLetter === this.letter)
         {
-            // No blocking actions, just place the letter
-            this.placeLetter(selectedLetter, function ()
+            LetterQueue.selectNextLetter();
+            return;
+        }
+
+        var selectedContainer = selectedLetter.container;
+
+        if (this.letter)
+        {
+            if (selectedContainer)
             {
-                if (selectedContainer)
-                {
-                    // The source is another container
-                    selectedContainer.letter = null;
-                    LetterQueue.selectNextLetter();
-                    return;
-                }
+                // The source is another container, but we have a letter
+                this.swapLetters(selectedContainer, this);
+                return;
+            }
 
-                // The source is the letter queue
-                LetterQueue.letters.pop();
-                LetterQueue.cycleLetters(function ()
-                {
-                    LetterQueue.selectNextLetter();
-                });
-            });
-
+            // The source is the letter queue, but we have a letter
+            SelectionManager.selectLetter(this.letter);
             return;
         }
 
-        if (selectedContainer)
+        // No blocking actions, just place the letter
+        this.placeLetter(selectedLetter, function ()
         {
-            // The source is another container, but we have a letter
-            this.swapLetters(selectedContainer, this);
-            return;
-        }
+            if (selectedContainer)
+            {
+                // The source is another container
+                selectedContainer.letter = null;
+                LetterQueue.selectNextLetter();
+                return;
+            }
 
-        // The source is the letter queue, but we have a letter
-        SelectionManager.selectLetter(this.letter);
+            // The source is the letter queue
+            LetterQueue.letters.pop();
+            LetterQueue.cycleLetters(function ()
+            {
+                LetterQueue.selectNextLetter();
+            });
+        });
     };
 
     LetterContainer.prototype.swapLetters = function (containerA, containerB)
@@ -110,11 +130,7 @@ define(['js/selectionManager', 'js/inputBlocker', 'js/letterQueue', 'js/animatio
         this.letter = letter;
         this.letter.container = this;
 
-        var transitionAnimation = new TransitionAnimation(letter,
-        {
-            x: this.x,
-            y: this.y
-        }, 200, this.onLetterPlaced.bind(this, callback));
+        var transitionAnimation = new TransitionAnimation(letter, this, 200, this.onLetterPlaced.bind(this, callback));
 
         AnimationManager.addAnimation(transitionAnimation);
     };
