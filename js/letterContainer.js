@@ -7,8 +7,9 @@ define(['js/selectionManager', 'js/inputBlocker', 'js/letterQueue', 'js/animatio
         this.scaleX = 1;
         this.scaleY = 1;
         this.onResize(letterLength);
+        this.isSelected = false;
 
-        SelectionManager.addClickEventListener(this, this.onClick.bind(this), true);
+        SelectionManager.addBoundary(this);
     }
 
     LetterContainer.prototype.onResize = function (letterLength)
@@ -34,16 +35,51 @@ define(['js/selectionManager', 'js/inputBlocker', 'js/letterQueue', 'js/animatio
         this.scaledHeight = this.height * scaleY;
     };
 
-    LetterContainer.prototype.render = function (context, deltaTime)
+    LetterContainer.prototype.onTouchStart = function (touch)
     {
-        // Background
-        context.fillStyle = "rgba(0, 0, 0, 0.75)";
-        context.strokeRect(this.x, this.y, this.scaledWidth, this.scaledHeight);
-
         if (this.letter)
         {
-            this.letter.render(context, deltaTime);
+            this.letter.onTouchStart(touch);
         }
+    };
+
+    LetterContainer.prototype.onTouchExit = function ()
+    {
+        this.isSelected = false;
+    };
+
+    LetterContainer.prototype.onTouchEnter = function ()
+    {
+        this.isSelected = true;
+    };
+
+    LetterContainer.prototype.onTouchEnd = function (touch)
+    {
+        var letter = touch.element;
+        var sourceContainer = letter.container;
+
+        this.isSelected = false;
+
+        if (this.letter && !sourceContainer)
+        {
+            // The source is the letter queue and we have a letter
+            return;
+        }
+
+        this.placeLetter(letter, function ()
+        {
+            if (sourceContainer)
+            {
+                // The source is another container
+                sourceContainer.letter = null;
+                return;
+            }
+
+            // The source is the letter queue
+            SelectionManager.removeBoundary(LetterQueue.letters.pop());
+            LetterQueue.cycleLetters();
+
+        });
     };
 
     LetterContainer.prototype.onClick = function ()
@@ -103,36 +139,53 @@ define(['js/selectionManager', 'js/inputBlocker', 'js/letterQueue', 'js/animatio
         });
     };
 
-    LetterContainer.prototype.swapLetters = function (containerA, containerB)
+    LetterContainer.prototype.swapLetters = function (containerA, containerB, callback)
     {
         var tempLetter = containerA.letter;
 
         this.swapCount = 0;
 
-        containerA.placeLetter(containerB.letter, this.onSwapCompleted.bind(this));
-        containerB.placeLetter(tempLetter, this.onSwapCompleted.bind(this));
+        containerA.transitionLetter(containerB.letter, this.onTransitionCompleted.bind(this, callback));
+        containerB.transitionLetter(tempLetter, this.onTransitionCompleted.bind(this, callback));
     };
 
-    LetterContainer.prototype.onSwapCompleted = function ()
+    LetterContainer.prototype.onTransitionCompleted = function (callback)
     {
-        this.swapCount++;
+        this.swapCount--;
 
-        if (this.swapCount === 2)
+        if (this.swapCount === 0 && callback)
         {
-            LetterQueue.selectNextLetter();
+            callback();
         }
     };
 
-    LetterContainer.prototype.placeLetter = function (letter, callback)
+    LetterContainer.prototype.transitionLetter = function (letter, callback)
     {
-        InputBlocker.enable();
-
         this.letter = letter;
         this.letter.container = this;
 
         var transitionAnimation = new TransitionAnimation(letter, this, 200, this.onLetterPlaced.bind(this, callback));
 
         AnimationManager.addAnimation(transitionAnimation);
+    };
+
+    LetterContainer.prototype.placeLetter = function (placedLetter, callback)
+    {
+        InputBlocker.enable();
+
+        if (this.letter)
+        {
+            this.swapLetters(this, placedLetter.container, callback);
+            return;
+        }
+
+        var container = placedLetter.container;
+        if (container)
+        {
+            placedLetter.container.letter = null;
+        }
+
+        this.transitionLetter(placedLetter, callback);
     };
 
     LetterContainer.prototype.onLetterPlaced = function (callback)
@@ -143,6 +196,24 @@ define(['js/selectionManager', 'js/inputBlocker', 'js/letterQueue', 'js/animatio
         }
 
         InputBlocker.disable();
+    };
+
+    LetterContainer.prototype.render = function (context, deltaTime)
+    {
+        context.strokeStyle = "rgba(0, 0, 0, 0.75)";
+
+        if (this.isSelected)
+        {
+            context.strokeStyle = "rgba(255, 255, 255, 0.75)";
+        }
+
+        // Background
+        context.strokeRect(this.x, this.y, this.scaledWidth, this.scaledHeight);
+
+        if (this.letter)
+        {
+            this.letter.render(context, deltaTime);
+        }
     };
 
     return LetterContainer;

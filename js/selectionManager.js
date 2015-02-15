@@ -1,32 +1,69 @@
-define([], function ()
+define(['js/inputBlocker', 'js/animationManager', 'js/bobbingAnimation', 'js/transitionAnimation'], function (InputBlocker, AnimationManager, BobbingAnimation, TransitionAnimation)
 {
+    function getEventObj(e)
+    {
+        return {
+            identifier: e.identifier,
+            pageX: e.pageX,
+            pageY: e.pageY,
+            target: e.target
+        };
+    }
+
     function SelectionManager()
     {
-        this.clickBoundaries = [];
+        this.boundaries = [];
+        this.startTouches = {};
 
         this.canvas = document.body.firstElementChild;
-        this.canvas.addEventListener('click', this.onClick.bind(this), true);
+        // this.canvas.addEventListener('click', this.onClick.bind(this), true);
+
+        // Hook into input events
+        // window.addEventListener('mousedown', this.onClick.bind(this), false);
+        // window.addEventListener('mousemove', this.onClick.bind(this), false);
+        // window.addEventListener('mouseup', this.onClick.bind(this), false);
+        // window.addEventListener('blur', this.onClick.bind(this), false);
+
+        if (('ontouchstart' in window) || ('onmsgesturechange' in window))
+        {
+            window.addEventListener('touchstart', this.onTouchStart.bind(this), false);
+            window.addEventListener('touchmove', this.onTouchMove.bind(this), false);
+            window.addEventListener('touchend', this.onTouchEnd.bind(this), false);
+            //             window.addEventListener('touchcancel', this.onTouchCancel.bind(this), false);
+            document.body.style.msTouchAction = 'none';
+        }
+
         this.selectedLetter = null;
         this.sourceContainer = null;
         this.subscriptions = {};
     }
 
-    SelectionManager.prototype.addClickEventListener = function (element, callback, capture)
+    SelectionManager.prototype.addBoundary = function (element, callback, preventDefault)
     {
-        this.clickBoundaries.push(
+        this.boundaries.push(
         {
             element: element,
             callback: callback,
-            capture: capture
+            preventDefault: preventDefault
         });
     };
+
+    SelectionManager.prototype.removeBoundary = function (element)
+    {
+        for (var i = 0; i < this.boundaries.length; ++i)
+        {
+            if (this.boundaries[i].element === element)
+            {
+                this.boundaries.splice(i, 1);
+                return;
+            }
+        }
+    }
 
     SelectionManager.prototype.selectLetter = function (letter)
     {
         this.releaseSelection();
         this.selectedLetter = letter;
-
-        this.trigger("letterSelected", letter);
     };
 
     SelectionManager.prototype.selectContainer = function (container)
@@ -35,34 +72,181 @@ define([], function ()
         this.sourceContainer = container;
     };
 
-    SelectionManager.prototype.onClick = function (e)
+    SelectionManager.prototype.onTouchStart = function (e)
     {
-        var selectionFound = false;
-
-        for (var i = 0; i < this.clickBoundaries.length; ++i)
+        if (!InputBlocker.enabled && e.changedTouches)
         {
-            var boundary = this.clickBoundaries[i];
-
-            if (e.pageX >= boundary.element.x && e.pageX <= boundary.element.x + boundary.element.width &&
-                e.pageY >= boundary.element.y && e.pageY <= boundary.element.y + boundary.element.height)
+            for (var i = 0; i < e.changedTouches.length; i++)
             {
-                selectionFound = true;
-                if (boundary.callback)
+                var touch = getEventObj(e.changedTouches[i]);
+
+                var boundary = this.getSelectedBoundary(
                 {
-                    boundary.callback();
+                    x: touch.pageX,
+                    y: touch.pageY,
+                    scaledWidth: 0,
+                    scaledHeight: 0
+                });
+
+                if (!boundary)
+                {
+                    continue;
                 }
 
-                if (boundary.capture)
+                if (boundary.element.onTouchStart)
                 {
+                    boundary.element.onTouchStart(touch);
+                }
+
+                if (touch.element)
+                {
+                    this.startTouches[touch.identifier] = touch;
+                }
+            }
+
+            e.preventDefault();
+        }
+    };
+
+    SelectionManager.prototype.onTouchMove = function (e)
+    {
+        if (!InputBlocker.enabled && e.changedTouches)
+        {
+            for (var i = 0; i < e.changedTouches.length; i++)
+            {
+                var moveTouch = getEventObj(e.changedTouches[i]);
+
+                var startTouch = this.startTouches[moveTouch.identifier];
+                if (!startTouch)
+                {
+                    continue;
+                }
+
+                if (startTouch.element.onTouchMove)
+                {
+                    startTouch.element.onTouchMove(moveTouch.pageX - startTouch.offsetX, moveTouch.pageY - startTouch.offsetY);
+                }
+
+                var targetBoundary = this.getSelectedBoundary(startTouch.element);
+
+                if (startTouch.targetBoundary === targetBoundary)
+                {
+                    continue;
+                }
+
+                if (startTouch.targetBoundary)
+                {
+                    startTouch.targetBoundary.element.onTouchExit();
+                }
+
+                startTouch.targetBoundary = targetBoundary;
+
+                if (startTouch.targetBoundary)
+                {
+                    startTouch.targetBoundary.element.onTouchEnter();
+                }
+            }
+
+            e.preventDefault();
+        }
+    };
+
+    SelectionManager.prototype.onTouchEnd = function (e)
+    {
+        if (!InputBlocker.enabled && e.changedTouches)
+        {
+            for (var i = 0; i < e.changedTouches.length; i++)
+            {
+                var endTouch = getEventObj(e.changedTouches[i]);
+
+                var startTouch = this.startTouches[endTouch.identifier];
+                if (!startTouch)
+                {
+                    continue;
+                }
+
+                delete this.startTouches[endTouch.identifier];
+
+                var targetBoundary = this.getSelectedBoundary(startTouch.element);
+                if (!targetBoundary)
+                {
+                    startTouch.element.onTouchCancel(startTouch);
                     return;
                 }
+
+                targetBoundary.element.onTouchEnd(startTouch);
             }
         }
 
-        if (!selectionFound)
+        if (this.selectedTarget)
         {
-            this.trigger('bodySelected');
+            this.selectedTarget.element.onClick();
         }
+
+        this.selectedTarget = null;
+    };
+
+    SelectionManager.prototype.getSelectedBoundary = function (selectedElement)
+    {
+        var selectedBoundaries = [];
+
+        var selectedTop = selectedElement.y;
+        var selectedBottom = selectedElement.y + selectedElement.scaledHeight;
+        var selectedLeft = selectedElement.x;
+        var selectedRight = selectedElement.x + selectedElement.scaledWidth;
+        var targetTop;
+        var targetBottom;
+        var targetLeft;
+        var targetRight;
+
+        for (var i = 0; i < this.boundaries.length; ++i)
+        {
+            var element = this.boundaries[i].element;
+            if (element === selectedElement)
+            {
+                continue;
+            }
+
+            targetTop = element.y;
+            targetBottom = element.y + element.scaledHeight;
+            targetLeft = element.x;
+            targetRight = element.x + element.scaledWidth;
+
+            // These can't be true if it's an actual collision
+            if (selectedBottom <= targetTop || selectedTop >= targetBottom ||
+                selectedRight <= targetLeft || selectedLeft >= targetRight)
+            {
+                continue;
+            }
+
+            selectedBoundaries.push(this.boundaries[i]);
+        }
+
+        var collisionArea = 0;
+        var selectedBoundary = null;
+
+        for (i = 0; i < selectedBoundaries.length; ++i)
+        {
+            var boundary = selectedBoundaries[i];
+            var targetElement = boundary.element;
+
+            targetTop = targetElement.y;
+            targetBottom = targetElement.y + targetElement.scaledHeight;
+            targetLeft = targetElement.x;
+            targetRight = targetElement.x + targetElement.scaledWidth;
+
+            var xOverlap = Math.min(targetRight, selectedRight) - Math.max(targetLeft, selectedLeft);
+            var yOverlap = Math.min(targetBottom, selectedBottom) - Math.max(targetTop, selectedTop);
+            var area = xOverlap * yOverlap;
+
+            if (area >= collisionArea)
+            {
+                collisionArea = area;
+                selectedBoundary = boundary;
+            }
+        }
+
+        return selectedBoundary;
     };
 
     SelectionManager.prototype.releaseSelection = function ()
@@ -71,7 +255,7 @@ define([], function ()
         this.selectedLetter = null;
         this.sourceContainer = null;
 
-        this.trigger('selectionReleased', tempLetter);
+        AnimationManager.removeAnimations(tempLetter);
     };
 
     SelectionManager.prototype.on = function (event, callback, context)

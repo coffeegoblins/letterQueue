@@ -23,10 +23,9 @@ define(['js/wordLogic', 'js/configuration', 'js/letterQueue', 'js/letterContaine
             this.submitButton = new Button("Submit", this.onSubmitButtonClicked.bind(this));
         },
 
-        onResize: function (canvas)
+        onResize: function (canvas, letterLength)
         {
-            var lengthModifier = (canvas.clientWidth > canvas.clientHeight) ? canvas.clientHeight : canvas.clientWidth;
-            this.letterLength = lengthModifier / 10;
+            this.letterLength = letterLength;
             this.margin = this.letterLength / 10;
 
             var totalMargin = this.letterContainers.length * this.margin;
@@ -86,6 +85,7 @@ define(['js/wordLogic', 'js/configuration', 'js/letterQueue', 'js/letterContaine
             if (WordLogic.isValidWord(word))
             {
                 SelectionManager.releaseSelection();
+
                 this.startSuccessAnimation(letters);
 
                 LetterStatistics.addScore(score, word);
@@ -136,7 +136,6 @@ define(['js/wordLogic', 'js/configuration', 'js/letterQueue', 'js/letterContaine
                 var fadeBatch = new BatchAnimation(fadeAnimations, 1000, function ()
                 {
                     this.clearAssembly();
-                    LetterQueue.selectNextLetter();
                 }.bind(this));
 
                 fadeBatch.isInputBlocking = true;

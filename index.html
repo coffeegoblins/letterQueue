@@ -38,8 +38,8 @@
                     {
                         AdMob.showBanner();
 
-                        Main.on('restart', AdMob.showInterstitial, AdMob);
-                        Main.on('resume', AdMob.showInterstitial, AdMob);
+                        Game.on('restart', AdMob.showInterstitial, AdMob);
+                        Game.on('resume', AdMob.showInterstitial, AdMob);
                     }
 
                     function render(timeStamp)

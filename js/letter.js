@@ -1,4 +1,4 @@
-define([], function ()
+define(['js/transitionAnimation', 'js/animationManager'], function (TransitionAnimation, AnimationManager)
 {
     function Letter(letterLength)
     {
@@ -36,6 +36,44 @@ define([], function ()
         this.scaleY = scaleY;
         this.scaledWidth = this.width * scaleX;
         this.scaledHeight = this.height * scaleY;
+    };
+
+    Letter.prototype.onTouchStart = function (touch)
+    {
+        touch.element = this;
+        touch.originalX = this.x;
+        touch.originalY = this.y;
+        touch.offsetX = touch.pageX - this.x;
+        touch.offsetY = touch.pageY - this.y;
+    };
+
+    Letter.prototype.onTouchCancel = function (touch)
+    {
+        var transitionAnimation = new TransitionAnimation(this,
+        {
+            x: touch.originalX,
+            y: touch.originalY
+        }, 200);
+
+        AnimationManager.addAnimation(transitionAnimation);
+    };
+
+    Letter.prototype.onTouchMove = function (x, y)
+    {
+        this.x = x;
+        this.y = y;
+    };
+
+    Letter.prototype.onTouchEnter = function () {
+
+    };
+
+    Letter.prototype.onTouchExit = function () {
+
+    };
+
+    Letter.prototype.onTouchEnd = function () {
+
     };
 
     Letter.prototype.render = function (context, deltaTime)

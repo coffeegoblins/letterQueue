@@ -11,6 +11,22 @@ define(['js/letter', 'js/configuration', 'js/animationManager', 'js/selectionMan
         initialize: function ()
         {
             this.cycleLetters();
+
+            SelectionManager.on('letterPlaced', this.onLetterPlaced, this);
+        },
+
+        onLetterPlaced: function (letter)
+        {
+            if (this.nextLetter === letter)
+            {
+                this.letters.splice(this.letters.indexOf(letter), 1);
+
+                if (this.letters.length < this.maxLetters)
+                {
+                    this.cycleLetters();
+                    return;
+                }
+            }
         },
 
         cycleLetters: function ()
@@ -55,23 +71,22 @@ define(['js/letter', 'js/configuration', 'js/animationManager', 'js/selectionMan
 
         selectNextLetter: function ()
         {
-            var nextLetter = this.letters[this.letters.length - 1];
-            if (SelectionManager.selectedLetter !== nextLetter)
+            this.nextLetter = this.letters[this.letters.length - 1];
+            if (SelectionManager.selectedLetter !== this.nextLetter)
             {
-                SelectionManager.selectLetter(nextLetter);
+                SelectionManager.selectLetter(this.nextLetter);
+                SelectionManager.addBoundary(this.nextLetter, null, true);
             }
         },
 
-        onResize: function (canvas)
+        onResize: function (canvas, letterLength)
         {
-            var lengthModifier = (canvas.clientWidth > canvas.clientHeight) ? canvas.clientHeight : canvas.clientWidth;
-            var letterLength = lengthModifier / 10;
-            this.margin = letterLength / 10;
+            this.margin = letterLength;
             this.letterLength = letterLength;
 
             this.targetValues = [
                 {
-                    x: this.margin,
+                    x: this.letterLength / 10,
                     y: this.margin + letterLength / 5,
                     scaleX: 0.125,
                     scaleY: 0.125,
@@ -181,7 +196,7 @@ define(['js/letter', 'js/configuration', 'js/animationManager', 'js/selectionMan
                 var targetValue = this.targetValues[i];
                 var previousValue = this.targetValues[i - 1];
 
-                targetValue.x = previousValue.x + previousValue.scaleX * (letterLength / 2) + this.margin;
+                targetValue.x = previousValue.x + previousValue.scaleX * (letterLength / 2) + letterLength / 10;
             }
 
             for (i = 0; i < this.letters.length; ++i)
@@ -222,7 +237,8 @@ define(['js/letter', 'js/configuration', 'js/animationManager', 'js/selectionMan
                     return;
                 }
 
-                SelectionManager.selectLetter(this.letters[this.letters.length - 1]);
+                var nextLetter = this.letters[this.letters.length - 1];
+                SelectionManager.selectLetter(nextLetter);
                 if (callback)
                 {
                     callback();

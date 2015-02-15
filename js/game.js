@@ -30,9 +30,9 @@ define(['js/animationManager', 'js/letterQueue', 'js/letterStorage', 'js/letterA
                 var lengthModifier = (this.canvas.clientWidth > this.canvas.clientHeight) ? this.canvas.clientHeight : this.canvas.clientWidth;
                 this.letterLength = lengthModifier / 10;
 
-                LetterQueue.onResize(this.canvas);
-                LetterStorage.onResize(this.canvas);
-                LetterAssembly.onResize(this.canvas);
+                LetterQueue.onResize(this.canvas, this.letterLength);
+                LetterStorage.onResize(this.canvas, this.letterLength);
+                LetterAssembly.onResize(this.canvas, this.letterLength);
 
                 AnimationManager.onResize(this.canvas);
 

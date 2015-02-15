@@ -9,8 +9,9 @@ define(['js/selectionManager'], function (SelectionManager)
         this.text = text;
         this.setScale(1, 1);
         this.callback = callback;
+        this.borderFillStyle = "rgb(0, 0, 0)";
 
-        SelectionManager.addClickEventListener(this, this.onClick.bind(this), true);
+        SelectionManager.addBoundary(this);
     }
 
     Button.prototype.setScale = function (scaleX, scaleY)
@@ -28,8 +29,26 @@ define(['js/selectionManager'], function (SelectionManager)
         this.setScale(1, 1);
     };
 
-    Button.prototype.onClick = function ()
+    Button.prototype.onTouchStart = function (touch)
     {
+        touch.element = touch;
+        this.borderFillStyle = "rgb(255, 255, 255)";
+    };
+
+    Button.prototype.onTouchExit = function ()
+    {
+        this.borderFillStyle = "rgb(0, 0, 0)";
+    };
+
+    Button.prototype.onTouchEnter = function ()
+    {
+        this.borderFillStyle = "rgb(255, 255, 255)";
+    };
+
+    Button.prototype.onTouchEnd = function ()
+    {
+        this.borderFillStyle = "rgb(0, 0, 0)";
+        
         if (this.callback)
         {
             this.callback();
@@ -38,13 +57,16 @@ define(['js/selectionManager'], function (SelectionManager)
 
     Button.prototype.render = function (context)
     {
+        // Background
         context.fillStyle = "rgb(245, 245, 200)";
         context.fillRect(this.x, this.y,
             this.scaledWidth, this.scaledHeight);
 
-        context.fillStyle = "rgb(85, 39, 0)";
+        // Border
+        context.strokeStyle = this.borderFillStyle;
         context.strokeRect(this.x, this.y, this.scaledWidth, this.scaledHeight);
 
+        // Text
         context.font = this.scaledHeight / 2 + "px Arial";
         context.fillStyle = "black";
         context.textAlign = "center";

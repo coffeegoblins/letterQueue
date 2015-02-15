@@ -25,17 +25,17 @@ define([], function ()
 
     InputBlocker.prototype.disable = function ()
     {
-        this.blockInput = false;
+        this.enabled = false;
     };
 
     InputBlocker.prototype.enable = function ()
     {
-        this.blockInput = true;
+        this.enabled = true;
     };
 
     InputBlocker.prototype.preventDefault = function (e)
     {
-        if (this.blockInput)
+        if (this.enabled)
         {
             e.preventDefault();
         }

@@ -1,12 +1,9 @@
-define(['js/selectionManager', 'js/inputBlocker', 'js/transitionAnimation', 'js/bobbingAnimation', 'js/batchAnimation'], function (SelectionManager, InputBlocker, TransitionAnimation, BobbingAnimation, BatchAnimation)
+define(['js/inputBlocker', 'js/transitionAnimation', 'js/bobbingAnimation', 'js/batchAnimation'], function (InputBlocker, TransitionAnimation, BobbingAnimation, BatchAnimation)
 {
     function AnimationManager()
     {
         this.activeAnimations = [];
         this.blockingAnimationCount = 0;
-
-        SelectionManager.on("letterSelected", this.onLetterSelected.bind(this));
-        SelectionManager.on("selectionReleased", this.removeAnimations.bind(this));
     }
 
     AnimationManager.prototype.batchAnimations = function (animations, timeInMillseconds, callback)

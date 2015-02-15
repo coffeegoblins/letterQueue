@@ -1,8 +1,8 @@
-define(['js/letterContainer'], function (LetterContainer)
+define(['js/letterContainer', 'js/label'], function (LetterContainer, Label)
 {
     return {
         letterContainers: [],
-        margin: 10,
+        label: "Storage",
 
         initialize: function ()
         {
@@ -10,27 +10,40 @@ define(['js/letterContainer'], function (LetterContainer)
             this.letterContainers.push(new LetterContainer());
             this.letterContainers.push(new LetterContainer());
             this.letterContainers.push(new LetterContainer());
+            this.letterContainers.push(new LetterContainer());
+
+            this.storageLabel = new Label(this.label);
+            this.storageLabel.textAlign = "center";
         },
 
-        onResize: function (canvas)
+        onResize: function (canvas, letterLength)
         {
-            var lengthModifier = (canvas.clientWidth > canvas.clientHeight) ? canvas.clientHeight : canvas.clientWidth;
-            var letterLength = lengthModifier / 10;
-            this.margin = letterLength / 10;
+            this.margin = letterLength;
+            this.letterMargin = letterLength / 10;
 
-            var totalMargin = this.letterContainers.length * this.margin;
-            var currentPosition = window.innerWidth - this.letterContainers.length * letterLength - totalMargin;
+            var currentPositionX = window.innerWidth - letterLength - this.letterMargin;
 
             for (var i = 0; i < this.letterContainers.length; ++i)
             {
                 var letterContainer = this.letterContainers[i];
 
-                letterContainer.x = currentPosition;
+                letterContainer.x = currentPositionX;
                 letterContainer.y = this.margin;
                 letterContainer.onResize(letterLength);
 
-                currentPosition += letterLength + this.margin;
+                currentPositionX -= letterLength + this.letterMargin;
             }
+
+            // Undo the last loop
+            currentPositionX += letterLength + this.letterMargin;
+
+            var context = canvas.getContext('2d');
+
+            this.storageLabel.x = currentPositionX + (window.innerWidth - currentPositionX) / 2;
+            this.storageLabel.y = this.margin - this.letterMargin;
+            this.storageLabel.fontSize = letterLength / 3;
+
+            this.textPosition = 0;
         },
 
         render: function (context, deltaTime)
@@ -39,6 +52,8 @@ define(['js/letterContainer'], function (LetterContainer)
             {
                 this.letterContainers[i].render(context, deltaTime);
             }
+
+            this.storageLabel.render(context);
         }
     };
 });
