@@ -11,9 +11,32 @@ define(['js/letter', 'js/configuration', 'js/animationManager', 'js/selectionMan
         initialize: function ()
         {
             InputBlocker.enable();
-            this.cycleLetters();
 
             SelectionManager.on('letterPlaced', this.onLetterPlaced, this);
+
+            var letterValues = localStorage.getItem('letterQueue');
+            if (letterValues.length > 0)
+            {
+                this.existingLetters = JSON.parse(letterValues);
+                
+                if (this.existingLetters)
+                {
+                    for (var i = 0; i < this.existingLetters.length; ++i)
+                    {
+                        this.letters.push(new Letter(0, this.existingLetters[i]));
+                    }
+
+                    this.onLettersCycled();
+                    return;
+                }
+            }
+
+            this.cycleLetters();
+        },
+
+        onRestart: function ()
+        {
+            localStorage.setItem('letterQueue', null);
         },
 
         onLetterPlaced: function (letter)
@@ -34,6 +57,7 @@ define(['js/letter', 'js/configuration', 'js/animationManager', 'js/selectionMan
         cycleLetters: function ()
         {
             var startPosition = this.targetValues[0];
+
             var letterValue = this.getRandomLetter();
 
             var letter = new Letter(this.letterLength);
@@ -67,6 +91,14 @@ define(['js/letter', 'js/configuration', 'js/animationManager', 'js/selectionMan
                 this.cycleLetters();
                 return;
             }
+
+            var letterValues = [];
+            for (var i = 0; i < this.letters.length; ++i)
+            {
+                letterValues.push(this.letters[i].getSaveValues());
+            }
+
+            localStorage.setItem('letterQueue', JSON.stringify(letterValues));
 
             InputBlocker.disable();
         },

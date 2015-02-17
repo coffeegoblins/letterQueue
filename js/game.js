@@ -1,5 +1,5 @@
-define(['js/animationManager', 'js/letterQueue', 'js/letterStorage', 'js/letterAssembly', 'js/letterStatistics', 'js/button'],
-    function (AnimationManager, LetterQueue, LetterStorage, LetterAssembly, LetterStatistics, Button)
+define(['js/animationManager', 'js/letterQueue', 'js/letterStorage', 'js/letterAssembly', 'js/button'],
+    function (AnimationManager, LetterQueue, LetterStorage, LetterAssembly, Button)
     {
         'use strict';
 
@@ -48,7 +48,10 @@ define(['js/animationManager', 'js/letterQueue', 'js/letterStorage', 'js/letterA
 
             onRestartButtonClicked: function ()
             {
-                LetterStatistics.resetScore();
+                LetterQueue.onRestart();
+                LetterStorage.onRestart();
+                LetterAssembly.onRestart();
+
                 this.loadingDiv.style.opacity = 1;
                 location.reload();
                 this.trigger('restart');

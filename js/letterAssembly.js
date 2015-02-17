@@ -13,14 +13,14 @@ define(['js/wordLogic', 'js/configuration', 'js/letterQueue', 'js/letterContaine
 
             initialize: function ()
             {
-                this.letterContainers.push(new LetterContainer());
-                this.letterContainers.push(new LetterContainer());
-                this.letterContainers.push(new LetterContainer());
-                this.letterContainers.push(new LetterContainer());
-                this.letterContainers.push(new LetterContainer());
-                this.letterContainers.push(new LetterContainer());
-                this.letterContainers.push(new LetterContainer());
-                this.letterContainers.push(new LetterContainer());
+                this.letterContainers.push(new LetterContainer('a1'));
+                this.letterContainers.push(new LetterContainer('a2'));
+                this.letterContainers.push(new LetterContainer('a3'));
+                this.letterContainers.push(new LetterContainer('a4'));
+                this.letterContainers.push(new LetterContainer('a5'));
+                this.letterContainers.push(new LetterContainer('a6'));
+                this.letterContainers.push(new LetterContainer('a7'));
+                this.letterContainers.push(new LetterContainer('a8'));
 
                 LetterStatistics.initialize();
 
@@ -75,6 +75,16 @@ define(['js/wordLogic', 'js/configuration', 'js/letterQueue', 'js/letterContaine
                 this.submitButton.x = currentPositionX - this.letterLength * 2 - this.margin;
                 this.submitButton.y = window.innerHeight / 2 + this.letterLength + this.margin * 10;
                 this.submitButton.onResize(this.letterLength);
+            },
+
+            onRestart: function ()
+            {
+                LetterStatistics.resetScore();
+
+                for (var i = 0; i < this.letterContainers.length; ++i)
+                {
+                    this.letterContainers[i].clearLetter();
+                }
             },
 
             render: function (context, deltaTime)
@@ -227,7 +237,7 @@ define(['js/wordLogic', 'js/configuration', 'js/letterQueue', 'js/letterContaine
             {
                 for (var i = 0; i < this.letterContainers.length; ++i)
                 {
-                    this.letterContainers[i].letter = null;
+                    this.letterContainers[i].clearLetter();
                 }
             }
         };

@@ -6,11 +6,11 @@ define(['js/letterContainer', 'js/label'], function (LetterContainer, Label)
 
         initialize: function ()
         {
-            this.letterContainers.push(new LetterContainer());
-            this.letterContainers.push(new LetterContainer());
-            this.letterContainers.push(new LetterContainer());
-            this.letterContainers.push(new LetterContainer());
-            this.letterContainers.push(new LetterContainer());
+            this.letterContainers.push(new LetterContainer('s1'));
+            this.letterContainers.push(new LetterContainer('s2'));
+            this.letterContainers.push(new LetterContainer('s3'));
+            this.letterContainers.push(new LetterContainer('s4'));
+            this.letterContainers.push(new LetterContainer('s5'));
 
             this.storageLabel = new Label(this.label);
             this.storageLabel.textAlign = "center";
@@ -37,13 +37,19 @@ define(['js/letterContainer', 'js/label'], function (LetterContainer, Label)
             // Undo the last loop
             currentPositionX += letterLength + this.letterMargin;
 
-            var context = canvas.getContext('2d');
-
             this.storageLabel.x = currentPositionX + (window.innerWidth - currentPositionX) / 2;
             this.storageLabel.y = this.margin - this.letterMargin;
             this.storageLabel.fontSize = letterLength / 3;
 
             this.textPosition = 0;
+        },
+
+        onRestart: function ()
+        {
+            for (var i = 0; i < this.letterContainers.length; ++i)
+            {
+                this.letterContainers[i].clearLetter();
+            }
         },
 
         render: function (context, deltaTime)

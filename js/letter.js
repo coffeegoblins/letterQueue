@@ -1,18 +1,27 @@
 define(['js/transitionAnimation', 'js/animationManager', 'js/inputBlocker'], function (TransitionAnimation, AnimationManager, InputBlocker)
 {
-    function Letter(letterLength)
+    function Letter(letterLength, letterValues)
     {
-        this.score = 1;
-        this.x = 0;
-        this.y = 0;
-        this.scaleX = 1;
-        this.scaleY = 1;
-        this.width = letterLength;
-        this.height = letterLength;
-        this.setScale(1, 1);
-        this.color = {};
-        this.letterValue = "A";
-        this.letterOpacity = 1;
+        if (!letterValues)
+        {
+            letterValues = {};
+        }
+
+        this.score = letterValues.score || 1;
+        this.x = letterValues.x || 0;
+        this.y = letterValues.y || 0;
+        this.scaleX = letterValues.scaleX || 1;
+        this.scaleY = letterValues.scaleY || 1;
+        this.width = letterValues.width || letterLength;
+        this.height = letterValues.height || letterLength;
+        this.scaledWidth = letterValues.scaledWidth || letterLength;
+        this.scaledHeight = letterValues.scaledHeight || letterLength;
+        this.setScale(this.scaleX, this.scaleY);
+        this.color = letterValues.color ||
+        {};
+        this.letterValue = letterValues.letterValue || "A";
+        this.letterOpacity = letterValues.letterOpacity || 1;
+        this.container = letterValues.container;
 
         this.elapsedTime = null;
         this.deltaTime = null;
@@ -21,6 +30,24 @@ define(['js/transitionAnimation', 'js/animationManager', 'js/inputBlocker'], fun
         this.deltaColor = null;
         this.deltaOpacity = null;
     }
+
+    Letter.prototype.getSaveValues = function ()
+    {
+        return {
+            score: this.score,
+            x: this.x,
+            y: this.y,
+            scaleX: this.scaleX,
+            scaleY: this.scaleY,
+            width: this.width,
+            height: this.height,
+            scaledWidth: this.scaledWidth,
+            scaledHeight: this.scaledHeight,
+            color: this.color,
+            letterValue: this.letterValue,
+            letterOpacity: this.letterOpacity
+        };
+    };
 
     Letter.prototype.onResize = function (letterLength)
     {

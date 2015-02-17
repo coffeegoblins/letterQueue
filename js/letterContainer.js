@@ -1,7 +1,16 @@
-define(['js/selectionManager', 'js/inputBlocker', 'js/letterQueue', 'js/animationManager', 'js/transitionAnimation'], function (SelectionManager, InputBlocker, LetterQueue, AnimationManager, TransitionAnimation)
+define(['js/selectionManager', 'js/inputBlocker', 'js/letterQueue', 'js/animationManager', 'js/transitionAnimation', 'js/letter'], function (SelectionManager, InputBlocker, LetterQueue, AnimationManager, TransitionAnimation, Letter)
 {
-    function LetterContainer(letterLength)
+    function LetterContainer(id, letterLength)
     {
+        this.id = id;
+
+        var storedLetter = localStorage.getItem(id);
+        if (storedLetter)
+        {
+            this.letter = new Letter(letterLength, JSON.parse(storedLetter));
+            this.letter.container = this;
+        }
+
         this.x = 0;
         this.y = 0;
         this.scaleX = 1;
@@ -11,6 +20,12 @@ define(['js/selectionManager', 'js/inputBlocker', 'js/letterQueue', 'js/animatio
 
         SelectionManager.addBoundary(this);
     }
+
+    LetterContainer.prototype.clearLetter = function ()
+    {
+        localStorage.removeItem(this.id);
+        this.letter = null;
+    };
 
     LetterContainer.prototype.onResize = function (letterLength)
     {
@@ -72,7 +87,7 @@ define(['js/selectionManager', 'js/inputBlocker', 'js/letterQueue', 'js/animatio
             if (sourceContainer)
             {
                 // The source is another container
-                sourceContainer.letter = null;
+                sourceContainer.clearLetter();
                 return;
             }
 
@@ -126,7 +141,7 @@ define(['js/selectionManager', 'js/inputBlocker', 'js/letterQueue', 'js/animatio
             if (selectedContainer)
             {
                 // The source is another container
-                selectedContainer.letter = null;
+                selectedContainer.clearLetter();
                 LetterQueue.selectNextLetter();
                 return;
             }
@@ -197,6 +212,8 @@ define(['js/selectionManager', 'js/inputBlocker', 'js/letterQueue', 'js/animatio
         }
 
         InputBlocker.disable();
+
+        localStorage.setItem(this.id, JSON.stringify(this.letter.getSaveValues()));
     };
 
     LetterContainer.prototype.render = function (context, deltaTime)
