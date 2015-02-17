@@ -31,7 +31,7 @@ define(['js/selectionManager'], function (SelectionManager)
 
     Button.prototype.onTouchStart = function (touch)
     {
-        touch.element = touch;
+        touch.element = this;
         this.borderFillStyle = "rgb(255, 255, 255)";
     };
 
@@ -45,8 +45,13 @@ define(['js/selectionManager'], function (SelectionManager)
         this.borderFillStyle = "rgb(255, 255, 255)";
     };
 
-    Button.prototype.onTouchEnd = function ()
+    Button.prototype.onTouchEnd = function (touch)
     {
+        if (touch.element !== this)
+        {
+            return;
+        }
+        
         this.borderFillStyle = "rgb(0, 0, 0)";
         
         if (this.callback)

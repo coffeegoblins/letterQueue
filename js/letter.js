@@ -1,4 +1,4 @@
-define(['js/transitionAnimation', 'js/animationManager'], function (TransitionAnimation, AnimationManager)
+define(['js/transitionAnimation', 'js/animationManager', 'js/inputBlocker'], function (TransitionAnimation, AnimationManager, InputBlocker)
 {
     function Letter(letterLength)
     {
@@ -47,17 +47,6 @@ define(['js/transitionAnimation', 'js/animationManager'], function (TransitionAn
         touch.offsetY = touch.pageY - this.y;
     };
 
-    Letter.prototype.onTouchCancel = function (touch)
-    {
-        var transitionAnimation = new TransitionAnimation(this,
-        {
-            x: touch.originalX,
-            y: touch.originalY
-        }, 200);
-
-        AnimationManager.addAnimation(transitionAnimation);
-    };
-
     Letter.prototype.onTouchMove = function (x, y)
     {
         this.x = x;
@@ -72,11 +61,34 @@ define(['js/transitionAnimation', 'js/animationManager'], function (TransitionAn
 
     };
 
-    Letter.prototype.onTouchEnd = function () {
+    Letter.prototype.cancelTouch = function (touch)
+    {
+        InputBlocker.enable();
+        var transitionAnimation = new TransitionAnimation(this,
+            {
+                x: touch.originalX,
+                y: touch.originalY
+            },
+            200,
+            function ()
+            {
+                InputBlocker.disable();
+            });
 
+        AnimationManager.addAnimation(transitionAnimation);
     };
 
-    Letter.prototype.render = function (context, deltaTime)
+    Letter.prototype.onTouchEnd = function (touch)
+    {
+        if (touch.targetBoundary)
+        {
+            return;
+        }
+
+        this.cancelTouch(touch);
+    };
+
+    Letter.prototype.render = function (context)
     {
         // Background
         context.fillStyle = "rgba(" + Math.floor(this.color.r) + ", " + Math.floor(this.color.g) + ", " + Math.floor(this.color.b) + ", " + this.color.a + ")";

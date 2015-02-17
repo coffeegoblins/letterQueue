@@ -15,6 +15,9 @@ define(['js/animationManager', 'js/letterQueue', 'js/letterStorage', 'js/letterA
                 LetterStorage.initialize();
                 LetterAssembly.initialize();
 
+                this.loadingDiv = document.getElementById('loadingDiv');
+                this.loadingDiv.style.opacity = 0;
+
                 this.onResize();
 
                 LetterQueue.initialize();
@@ -46,6 +49,7 @@ define(['js/animationManager', 'js/letterQueue', 'js/letterStorage', 'js/letterA
             onRestartButtonClicked: function ()
             {
                 LetterStatistics.resetScore();
+                this.loadingDiv.style.opacity = 1;
                 location.reload();
                 this.trigger('restart');
             },

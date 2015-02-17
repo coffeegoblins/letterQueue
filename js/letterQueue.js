@@ -1,4 +1,4 @@
-define(['js/letter', 'js/configuration', 'js/animationManager', 'js/selectionManager', 'js/transitionAnimation', 'js/batchAnimation'], function (Letter, Configuration, AnimationManager, SelectionManager, TransitionAnimation, BatchAnimation)
+define(['js/letter', 'js/configuration', 'js/animationManager', 'js/selectionManager', 'js/transitionAnimation', 'js/batchAnimation', 'js/inputBlocker'], function (Letter, Configuration, AnimationManager, SelectionManager, TransitionAnimation, BatchAnimation, InputBlocker)
 {
     return {
         transitionTime: 200,
@@ -10,6 +10,7 @@ define(['js/letter', 'js/configuration', 'js/animationManager', 'js/selectionMan
 
         initialize: function ()
         {
+            InputBlocker.enable();
             this.cycleLetters();
 
             SelectionManager.on('letterPlaced', this.onLetterPlaced, this);
@@ -23,6 +24,7 @@ define(['js/letter', 'js/configuration', 'js/animationManager', 'js/selectionMan
 
                 if (this.letters.length < this.maxLetters)
                 {
+                    InputBlocker.enable();
                     this.cycleLetters();
                     return;
                 }
@@ -66,17 +68,13 @@ define(['js/letter', 'js/configuration', 'js/animationManager', 'js/selectionMan
                 return;
             }
 
+            InputBlocker.disable();
             this.selectNextLetter();
         },
 
         selectNextLetter: function ()
         {
-            this.nextLetter = this.letters[this.letters.length - 1];
-            if (SelectionManager.selectedLetter !== this.nextLetter)
-            {
-                SelectionManager.selectLetter(this.nextLetter);
-                SelectionManager.addBoundary(this.nextLetter, null, true);
-            }
+            SelectionManager.addBoundary(this.letters[this.letters.length - 1], null, true);
         },
 
         onResize: function (canvas, letterLength)
@@ -237,8 +235,6 @@ define(['js/letter', 'js/configuration', 'js/animationManager', 'js/selectionMan
                     return;
                 }
 
-                var nextLetter = this.letters[this.letters.length - 1];
-                SelectionManager.selectLetter(nextLetter);
                 if (callback)
                 {
                     callback();

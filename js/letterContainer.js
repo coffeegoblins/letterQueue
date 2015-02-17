@@ -63,6 +63,7 @@ define(['js/selectionManager', 'js/inputBlocker', 'js/letterQueue', 'js/animatio
         if (this.letter && !sourceContainer)
         {
             // The source is the letter queue and we have a letter
+            letter.cancelTouch(touch);
             return;
         }
 

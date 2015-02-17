@@ -4,9 +4,21 @@ html {
     height: 100%;
     margin: 0;
     padding: 0;
+    background: #800;
 }
 
 canvas {
-    display: block;
-    background: #800;
+    z-index: 10;
+}
+
+div {
+    color: #FFF;
+    text-align: center;
+    transform: translateY(-50%);
+    top: 50%;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    position: absolute;
+    z-index: 9;
 }

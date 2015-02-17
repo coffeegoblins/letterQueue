@@ -16,20 +16,12 @@ define(['js/inputBlocker', 'js/animationManager', 'js/bobbingAnimation', 'js/tra
         this.startTouches = {};
 
         this.canvas = document.body.firstElementChild;
-        // this.canvas.addEventListener('click', this.onClick.bind(this), true);
-
-        // Hook into input events
-        // window.addEventListener('mousedown', this.onClick.bind(this), false);
-        // window.addEventListener('mousemove', this.onClick.bind(this), false);
-        // window.addEventListener('mouseup', this.onClick.bind(this), false);
-        // window.addEventListener('blur', this.onClick.bind(this), false);
 
         if (('ontouchstart' in window) || ('onmsgesturechange' in window))
         {
             window.addEventListener('touchstart', this.onTouchStart.bind(this), false);
             window.addEventListener('touchmove', this.onTouchMove.bind(this), false);
             window.addEventListener('touchend', this.onTouchEnd.bind(this), false);
-            //             window.addEventListener('touchcancel', this.onTouchCancel.bind(this), false);
             document.body.style.msTouchAction = 'none';
         }
 
@@ -58,18 +50,6 @@ define(['js/inputBlocker', 'js/animationManager', 'js/bobbingAnimation', 'js/tra
                 return;
             }
         }
-    }
-
-    SelectionManager.prototype.selectLetter = function (letter)
-    {
-        this.releaseSelection();
-        this.selectedLetter = letter;
-    };
-
-    SelectionManager.prototype.selectContainer = function (container)
-    {
-        this.selectLetter(container.letter);
-        this.sourceContainer = container;
     };
 
     SelectionManager.prototype.onTouchStart = function (e)
@@ -84,8 +64,8 @@ define(['js/inputBlocker', 'js/animationManager', 'js/bobbingAnimation', 'js/tra
                 {
                     x: touch.pageX,
                     y: touch.pageY,
-                    scaledWidth: 0,
-                    scaledHeight: 0
+                    width: 0,
+                    height: 0
                 });
 
                 if (!boundary)
@@ -168,13 +148,13 @@ define(['js/inputBlocker', 'js/animationManager', 'js/bobbingAnimation', 'js/tra
                 delete this.startTouches[endTouch.identifier];
 
                 var targetBoundary = this.getSelectedBoundary(startTouch.element);
-                if (!targetBoundary)
+                if (targetBoundary)
                 {
-                    startTouch.element.onTouchCancel(startTouch);
-                    return;
+                    targetBoundary.element.onTouchEnd(startTouch);
                 }
 
-                targetBoundary.element.onTouchEnd(startTouch);
+                startTouch.targetBoundary = targetBoundary;
+                startTouch.element.onTouchEnd(startTouch);
             }
         }
 
@@ -191,9 +171,9 @@ define(['js/inputBlocker', 'js/animationManager', 'js/bobbingAnimation', 'js/tra
         var selectedBoundaries = [];
 
         var selectedTop = selectedElement.y;
-        var selectedBottom = selectedElement.y + selectedElement.scaledHeight;
+        var selectedBottom = selectedElement.y + selectedElement.height;
         var selectedLeft = selectedElement.x;
-        var selectedRight = selectedElement.x + selectedElement.scaledWidth;
+        var selectedRight = selectedElement.x + selectedElement.width;
         var targetTop;
         var targetBottom;
         var targetLeft;
@@ -208,9 +188,9 @@ define(['js/inputBlocker', 'js/animationManager', 'js/bobbingAnimation', 'js/tra
             }
 
             targetTop = element.y;
-            targetBottom = element.y + element.scaledHeight;
+            targetBottom = element.y + element.height;
             targetLeft = element.x;
-            targetRight = element.x + element.scaledWidth;
+            targetRight = element.x + element.width;
 
             // These can't be true if it's an actual collision
             if (selectedBottom <= targetTop || selectedTop >= targetBottom ||
@@ -247,15 +227,6 @@ define(['js/inputBlocker', 'js/animationManager', 'js/bobbingAnimation', 'js/tra
         }
 
         return selectedBoundary;
-    };
-
-    SelectionManager.prototype.releaseSelection = function ()
-    {
-        var tempLetter = this.selectedLetter;
-        this.selectedLetter = null;
-        this.sourceContainer = null;
-
-        AnimationManager.removeAnimations(tempLetter);
     };
 
     SelectionManager.prototype.on = function (event, callback, context)
