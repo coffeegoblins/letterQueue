@@ -69,12 +69,6 @@ define(['js/letter', 'js/configuration', 'js/animationManager', 'js/selectionMan
             }
 
             InputBlocker.disable();
-            this.selectNextLetter();
-        },
-
-        selectNextLetter: function ()
-        {
-            SelectionManager.addBoundary(this.letters[this.letters.length - 1], null, true);
         },
 
         onResize: function (canvas, letterLength)
@@ -197,6 +191,13 @@ define(['js/letter', 'js/configuration', 'js/animationManager', 'js/selectionMan
                 targetValue.x = previousValue.x + previousValue.scaleX * (letterLength / 2) + letterLength / 10;
             }
 
+            this.x = this.targetValues[this.targetValues.length - 1].x - letterLength;
+            this.y = this.targetValues[this.targetValues.length - 1].y - letterLength;
+            this.width = this.targetValues[this.targetValues.length - 1].x + letterLength;
+            this.height = this.targetValues[this.targetValues.length - 1].y + letterLength;
+
+            SelectionManager.addBoundary(this);
+
             for (i = 0; i < this.letters.length; ++i)
             {
                 var letter = this.letters[i];
@@ -212,6 +213,24 @@ define(['js/letter', 'js/configuration', 'js/animationManager', 'js/selectionMan
                 letter.color.a = this.targetValues[i].color.a;
                 letter.setScale(this.targetValues[i].scaleX, this.targetValues[i].scaleY);
             }
+        },
+
+        onTouchStart: function (touch)
+        {
+            this.letters[this.letters.length - 1].onTouchStart(touch);
+        },
+
+        onTouchEnter: function () {
+
+        },
+
+        onTouchExit: function () {
+
+        },
+
+        onTouchEnd: function (touch)
+        {
+            this.letters[this.letters.length - 1].cancelTouch(touch);
         },
 
         render: function (context, deltaTime)

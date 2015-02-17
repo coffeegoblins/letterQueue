@@ -211,9 +211,9 @@ define(['js/inputBlocker', 'js/animationManager', 'js/bobbingAnimation', 'js/tra
             var targetElement = boundary.element;
 
             targetTop = targetElement.y;
-            targetBottom = targetElement.y + targetElement.scaledHeight;
+            targetBottom = targetElement.y + targetElement.height;
             targetLeft = targetElement.x;
-            targetRight = targetElement.x + targetElement.scaledWidth;
+            targetRight = targetElement.x + targetElement.width;
 
             var xOverlap = Math.min(targetRight, selectedRight) - Math.max(targetLeft, selectedLeft);
             var yOverlap = Math.min(targetBottom, selectedBottom) - Math.max(targetTop, selectedTop);
