@@ -1,4 +1,4 @@
-define(['js/label'], function (Label)
+define(['js/label', 'js/renderer'], function (Label, Renderer)
 {
     return {
         currentScore: localStorage.getItem('currentScore') || 0,
@@ -10,14 +10,22 @@ define(['js/label'], function (Label)
         initialize: function ()
         {
             this.scoreLabel = new Label("Score");
-            this.highScoreLabel = new Label("High Score");
-            this.highestScoringWordLabel = new Label("Highest Scoring Word");
-            this.longestWordLabel = new Label("Longest Word");
-
             this.scoreValueLabel = new Label(this.currentScore.toString());
+            this.highScoreLabel = new Label("High Score");
             this.highScoreValueLabel = new Label(this.highScore.toString());
+            this.highestScoringWordLabel = new Label("Highest Scoring Word");
             this.highestScoringWordValueLabel = new Label(this.highestScoringWord.toString());
+            this.longestWordLabel = new Label("Longest Word");
             this.longestWordValueLabel = new Label(this.longestWord.toString());
+
+            Renderer.addRenderable(this.scoreLabel);
+            Renderer.addRenderable(this.scoreValueLabel);
+            Renderer.addRenderable(this.highScoreLabel);
+            Renderer.addRenderable(this.highScoreValueLabel);
+            Renderer.addRenderable(this.highestScoringWordLabel);
+            Renderer.addRenderable(this.highestScoringWordValueLabel);
+            Renderer.addRenderable(this.longestWordLabel);
+            Renderer.addRenderable(this.longestWordValueLabel);
         },
 
         onResize: function (canvas, letterLength, margin, x, y)
@@ -96,19 +104,6 @@ define(['js/label'], function (Label)
         {
             this.currentScore = 0;
             localStorage.setItem('currentScore', 0);
-        },
-
-        render: function (context)
-        {
-            this.scoreLabel.render(context);
-            this.highScoreLabel.render(context);
-            this.highestScoringWordLabel.render(context);
-            this.longestWordLabel.render(context);
-
-            this.scoreValueLabel.render(context);
-            this.highScoreValueLabel.render(context);
-            this.highestScoringWordValueLabel.render(context);
-            this.longestWordValueLabel.render(context);
         }
     };
 });

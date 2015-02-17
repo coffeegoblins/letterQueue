@@ -1,4 +1,4 @@
-define(['js/transitionAnimation', 'js/animationManager', 'js/inputBlocker'], function (TransitionAnimation, AnimationManager, InputBlocker)
+define(['js/transitionAnimation', 'js/animationManager', 'js/inputBlocker', 'js/renderer'], function (TransitionAnimation, AnimationManager, InputBlocker, Renderer)
 {
     function Letter(letterLength, letterValues)
     {
@@ -72,6 +72,9 @@ define(['js/transitionAnimation', 'js/animationManager', 'js/inputBlocker'], fun
         touch.originalY = this.y;
         touch.offsetX = touch.pageX - this.x;
         touch.offsetY = touch.pageY - this.y;
+
+        Renderer.removeRenderable(this);
+        Renderer.addRenderable(this, 10);
     };
 
     Letter.prototype.onTouchMove = function (x, y)
@@ -100,6 +103,8 @@ define(['js/transitionAnimation', 'js/animationManager', 'js/inputBlocker'], fun
             function ()
             {
                 InputBlocker.disable();
+                Renderer.removeRenderable(this);
+                Renderer.addRenderable(this, 1);
             });
 
         AnimationManager.addAnimation(transitionAnimation);

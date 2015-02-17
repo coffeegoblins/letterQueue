@@ -1,5 +1,5 @@
-define(['js/animationManager', 'js/letterQueue', 'js/letterStorage', 'js/letterAssembly', 'js/button'],
-    function (AnimationManager, LetterQueue, LetterStorage, LetterAssembly, Button)
+define(['js/animationManager', 'js/letterQueue', 'js/letterStorage', 'js/letterAssembly', 'js/button', 'js/renderer'],
+    function (AnimationManager, LetterQueue, LetterStorage, LetterAssembly, Button, Renderer)
     {
         'use strict';
 
@@ -62,9 +62,8 @@ define(['js/animationManager', 'js/letterQueue', 'js/letterStorage', 'js/letterA
                 var deltaTime = timeStamp - this.previousTimeStamp;
 
                 AnimationManager.update(deltaTime);
-                LetterStorage.render(this.context, deltaTime);
-                LetterAssembly.render(this.context, deltaTime);
-                LetterQueue.render(this.context, deltaTime);
+
+                Renderer.render(this.context, deltaTime);
 
                 this.restartButton.render(this.context);
 

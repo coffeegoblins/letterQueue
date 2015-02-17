@@ -1,8 +1,8 @@
 define(['js/wordLogic', 'js/configuration', 'js/letterQueue', 'js/letterContainer', 'js/button',
         'js/letterStatistics', 'js/label', 'js/animationManager', 'js/transitionAnimation',
-        'js/batchAnimation', 'js/inputBlocker'],
+        'js/batchAnimation', 'js/inputBlocker', 'js/renderer'],
     function (WordLogic, Configuration, LetterQueue, LetterContainer, Button, LetterStatistics, Label,
-        AnimationManager, TransitionAnimation, BatchAnimation, InputBlocker)
+        AnimationManager, TransitionAnimation, BatchAnimation, InputBlocker, Renderer)
     {
         return {
             letterContainers: [],
@@ -22,16 +22,24 @@ define(['js/wordLogic', 'js/configuration', 'js/letterQueue', 'js/letterContaine
                 this.letterContainers.push(new LetterContainer('a7'));
                 this.letterContainers.push(new LetterContainer('a8'));
 
-                LetterStatistics.initialize();
-
                 this.failLabel = new Label("Invalid Word!");
                 this.failLabel.textAlign = "center";
                 this.failLabel.color.a = 0;
-
                 this.multiplierLabel = new Label("Multiplier:");
                 this.multiplierValueLabel = new Label("1x");
-
                 this.submitButton = new Button("Submit", this.onSubmitButtonClicked.bind(this));
+
+                for (var i = 0; i < this.letterContainers.length; ++i)
+                {
+                    Renderer.addRenderable(this.letterContainers[i]);
+                }
+
+                Renderer.addRenderable(this.submitButton);
+                Renderer.addRenderable(this.failLabel);
+                Renderer.addRenderable(this.multiplierLabel);
+                Renderer.addRenderable(this.multiplierValueLabel);
+
+                LetterStatistics.initialize();
             },
 
             onResize: function (canvas, letterLength)
@@ -85,21 +93,6 @@ define(['js/wordLogic', 'js/configuration', 'js/letterQueue', 'js/letterContaine
                 {
                     this.letterContainers[i].clearLetter();
                 }
-            },
-
-            render: function (context, deltaTime)
-            {
-                for (var i = 0; i < this.letterContainers.length; ++i)
-                {
-                    this.letterContainers[i].render(context, deltaTime);
-                }
-
-                this.submitButton.render(context, deltaTime);
-                this.failLabel.render(context);
-                this.multiplierLabel.render(context);
-                this.multiplierValueLabel.render(context);
-
-                LetterStatistics.render(context);
             },
 
             onSubmitButtonClicked: function ()
@@ -237,6 +230,11 @@ define(['js/wordLogic', 'js/configuration', 'js/letterQueue', 'js/letterContaine
             {
                 for (var i = 0; i < this.letterContainers.length; ++i)
                 {
+                    if (this.letterContainers[i].letter)
+                    {
+                        Renderer.removeRenderable(this.letterContainers[i].letter);
+                    }
+
                     this.letterContainers[i].clearLetter();
                 }
             }

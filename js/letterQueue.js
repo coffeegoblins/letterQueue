@@ -1,4 +1,4 @@
-define(['js/letter', 'js/configuration', 'js/animationManager', 'js/selectionManager', 'js/transitionAnimation', 'js/batchAnimation', 'js/inputBlocker'], function (Letter, Configuration, AnimationManager, SelectionManager, TransitionAnimation, BatchAnimation, InputBlocker)
+define(['js/letter', 'js/configuration', 'js/animationManager', 'js/selectionManager', 'js/transitionAnimation', 'js/batchAnimation', 'js/inputBlocker', 'js/renderer'], function (Letter, Configuration, AnimationManager, SelectionManager, TransitionAnimation, BatchAnimation, InputBlocker, Renderer)
 {
     return {
         transitionTime: 200,
@@ -18,12 +18,14 @@ define(['js/letter', 'js/configuration', 'js/animationManager', 'js/selectionMan
             if (letterValues.length > 0)
             {
                 this.existingLetters = JSON.parse(letterValues);
-                
+
                 if (this.existingLetters)
                 {
                     for (var i = 0; i < this.existingLetters.length; ++i)
                     {
-                        this.letters.push(new Letter(0, this.existingLetters[i]));
+                        var letter = new Letter(0, this.existingLetters[i]);
+                        this.letters.push(letter);
+                        Renderer.addRenderable(letter, i);
                     }
 
                     this.onLettersCycled();
@@ -74,6 +76,8 @@ define(['js/letter', 'js/configuration', 'js/animationManager', 'js/selectionMan
 
             this.letters.unshift(letter);
 
+            Renderer.addRenderable(letter, 0);
+
             var animations = [];
 
             for (var i = 0; i < this.letters.length; ++i)
@@ -95,6 +99,7 @@ define(['js/letter', 'js/configuration', 'js/animationManager', 'js/selectionMan
             var letterValues = [];
             for (var i = 0; i < this.letters.length; ++i)
             {
+                this.letters[i].zIndex++;
                 letterValues.push(this.letters[i].getSaveValues());
             }
 
@@ -263,14 +268,6 @@ define(['js/letter', 'js/configuration', 'js/animationManager', 'js/selectionMan
         onTouchEnd: function (touch)
         {
             this.letters[this.letters.length - 1].cancelTouch(touch);
-        },
-
-        render: function (context, deltaTime)
-        {
-            for (var i = 0; i < this.letters.length; ++i)
-            {
-                this.letters[i].render(context, deltaTime);
-            }
         },
 
         letterTransitionComplete: function (callback)

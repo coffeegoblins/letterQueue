@@ -1,4 +1,4 @@
-define(['js/letterContainer', 'js/label'], function (LetterContainer, Label)
+define(['js/letterContainer', 'js/label', 'js/renderer'], function (LetterContainer, Label, Renderer)
 {
     return {
         letterContainers: [],
@@ -14,6 +14,13 @@ define(['js/letterContainer', 'js/label'], function (LetterContainer, Label)
 
             this.storageLabel = new Label(this.label);
             this.storageLabel.textAlign = "center";
+
+            Renderer.addRenderable(this.storageLabel);
+
+            for (var i = 0; i < this.letterContainers.length; ++i)
+            {
+                Renderer.addRenderable(this.letterContainers[i]);
+            }
         },
 
         onResize: function (canvas, letterLength)
@@ -50,16 +57,6 @@ define(['js/letterContainer', 'js/label'], function (LetterContainer, Label)
             {
                 this.letterContainers[i].clearLetter();
             }
-        },
-
-        render: function (context, deltaTime)
-        {
-            for (var i = 0; i < this.letterContainers.length; ++i)
-            {
-                this.letterContainers[i].render(context, deltaTime);
-            }
-
-            this.storageLabel.render(context);
         }
     };
 });
