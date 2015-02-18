@@ -17,12 +17,17 @@ define([], function ()
                 }
             }
 
-            renderables.splice(index, 0, renderable);
+            renderables.splice(index + 1, 0, renderable);
         },
 
         removeRenderable: function (renderable)
         {
-            renderables.splice(renderables.indexOf(renderable), 1);
+            var index = renderables.indexOf(renderable);
+
+            if (index !== -1)
+            {
+                renderables.splice(index, 1);
+            }
         },
 
         render: function (context, deltaTime)

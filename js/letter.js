@@ -105,7 +105,7 @@ define(['js/transitionAnimation', 'js/animationManager', 'js/inputBlocker', 'js/
                 InputBlocker.disable();
                 Renderer.removeRenderable(this);
                 Renderer.addRenderable(this, 1);
-            });
+            }.bind(this));
 
         AnimationManager.addAnimation(transitionAnimation);
     };

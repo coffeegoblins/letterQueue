@@ -15,7 +15,7 @@ define(['js/letter', 'js/configuration', 'js/animationManager', 'js/selectionMan
             SelectionManager.on('letterPlaced', this.onLetterPlaced, this);
 
             var letterValues = localStorage.getItem('letterQueue');
-            if (letterValues.length > 0)
+            if (letterValues && letterValues.length > 0)
             {
                 this.existingLetters = JSON.parse(letterValues);
 
@@ -28,6 +28,7 @@ define(['js/letter', 'js/configuration', 'js/animationManager', 'js/selectionMan
                         Renderer.addRenderable(letter, i);
                     }
 
+                    this.onResize(null, this.letterLength);
                     this.onLettersCycled();
                     return;
                 }
@@ -90,17 +91,23 @@ define(['js/letter', 'js/configuration', 'js/animationManager', 'js/selectionMan
 
         onLettersCycled: function ()
         {
+            var letterValues = [];
+            for (var i = 0; i < this.letters.length; ++i)
+            {
+                var letter = this.letters[i];
+                Renderer.removeRenderable(letter);
+
+                this.letters[i].zIndex++;
+
+                Renderer.addRenderable(letter, this.letters[i].zIndex);
+
+                letterValues.push(this.letters[i].getSaveValues());
+            }
+
             if (this.letters.length < this.maxLetters)
             {
                 this.cycleLetters();
                 return;
-            }
-
-            var letterValues = [];
-            for (var i = 0; i < this.letters.length; ++i)
-            {
-                this.letters[i].zIndex++;
-                letterValues.push(this.letters[i].getSaveValues());
             }
 
             localStorage.setItem('letterQueue', JSON.stringify(letterValues));

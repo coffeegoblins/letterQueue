@@ -6,7 +6,7 @@
       "projectTypeName": "com.intel.xdk.projecttype.jsapp",
       "src": "",
       "projectGuid": "4208571b-5494-4540-9e05-2d8c4707a1a1",
-      "lastModifiedDate": 1421806077461,
+      "lastModifiedDate": 1424219081342,
       "creationDate": 1420142094394
     },
     "sourceDirectory": "",
@@ -31,13 +31,6 @@
       }
     ],
     "cordovaPlugins": [
-      {
-        "id": "org.apache.cordova.dialogs",
-        "version": "0.2.6",
-        "selectedState": "Included",
-        "data": {},
-        "paramvals": {}
-      },
       {
         "id": "com.rjfun.cordova.plugin.admob",
         "version": "",
@@ -64,7 +57,32 @@
         "appName_": "LetterQueue",
         "appID_": "com.letterqueue.android",
         "appAccess_": "*",
-        "icons_": [],
+        "icons_": [
+          {
+            "relPath": "medium.png",
+            "density": "mdpi",
+            "height": 48,
+            "width": 48
+          },
+          {
+            "relPath": "large.png",
+            "density": "hdpi",
+            "height": 72,
+            "width": 72
+          },
+          {
+            "relPath": "xlarge.png",
+            "density": "xhdpi",
+            "height": 96,
+            "width": 96
+          },
+          {
+            "relPath": "small.png",
+            "density": "ldpi",
+            "height": 36,
+            "width": 36
+          }
+        ],
         "splashes_": [],
         "iosProvs_": [],
         "addlPermissions_": "",
@@ -88,16 +106,41 @@
         "appName_": "LetterQueue",
         "appID_": "com.letterqueue.android",
         "appAccess_": "*",
-        "icons_": [],
+        "icons_": [
+          {
+            "relPath": "small.png",
+            "density": "ldpi",
+            "height": 36,
+            "width": 36
+          },
+          {
+            "relPath": "medium.png",
+            "density": "mdpi",
+            "height": 48,
+            "width": 48
+          },
+          {
+            "relPath": "large.png",
+            "density": "hdpi",
+            "height": 72,
+            "width": 72
+          },
+          {
+            "relPath": "xlarge.png",
+            "density": "xhdpi",
+            "height": 96,
+            "width": 96
+          }
+        ],
         "splashes_": [],
         "iosProvs_": [],
         "addlPermissions_": "",
         "excludedLibraries_": "",
         "cordovaCLIVersion_": "3.3",
-        "appVersion_": "0.1.0",
+        "appVersion_": "0.2.0",
         "appVersionCode_": "1",
         "crosswalkVersion_": "stable",
-        "appDescription_": "This app is still in development.",
+        "appDescription_": "Arrange the letters to form words. The longer the word, the more points you get!",
         "appAuthor_": "Coffee Goblins"
       },
       "iOS": {
