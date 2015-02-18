@@ -73,6 +73,7 @@ define(['js/transitionAnimation', 'js/animationManager', 'js/inputBlocker', 'js/
         touch.offsetX = touch.pageX - this.x;
         touch.offsetY = touch.pageY - this.y;
 
+        this.originalZIndex = this.zIndex;
         Renderer.removeRenderable(this);
         Renderer.addRenderable(this, 10);
     };
@@ -104,7 +105,7 @@ define(['js/transitionAnimation', 'js/animationManager', 'js/inputBlocker', 'js/
             {
                 InputBlocker.disable();
                 Renderer.removeRenderable(this);
-                Renderer.addRenderable(this, 1);
+                Renderer.addRenderable(this, this.originalZIndex);
             }.bind(this));
 
         AnimationManager.addAnimation(transitionAnimation);

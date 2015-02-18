@@ -117,15 +117,15 @@ define(['js/letter', 'js/configuration', 'js/animationManager', 'js/selectionMan
 
         onResize: function (canvas, letterLength)
         {
-            this.margin = letterLength;
+            this.margin = letterLength / 2;
             this.letterLength = letterLength;
 
             this.targetValues = [
                 {
                     x: this.letterLength / 10,
-                    y: this.margin + letterLength / 5,
-                    scaleX: 0.125,
-                    scaleY: 0.125,
+                    y: this.margin + letterLength / 1.5,
+                    scaleX: 0.2,
+                    scaleY: 0.2,
                     color:
                     {
                         r: 149,
@@ -136,9 +136,9 @@ define(['js/letter', 'js/configuration', 'js/animationManager', 'js/selectionMan
                     letterOpacity: 0.3
                 },
                 {
-                    y: this.margin + letterLength / 8,
-                    scaleX: 0.143,
-                    scaleY: 0.143,
+                    y: this.margin + letterLength / 2,
+                    scaleX: 0.3,
+                    scaleY: 0.3,
                     color:
                     {
                         r: 162,
@@ -149,9 +149,9 @@ define(['js/letter', 'js/configuration', 'js/animationManager', 'js/selectionMan
                     letterOpacity: 0.4
                 },
                 {
-                    y: this.margin + letterLength / 16,
-                    scaleX: 0.167,
-                    scaleY: 0.167,
+                    y: this.margin + letterLength / 4,
+                    scaleX: 0.4,
+                    scaleY: 0.4,
                     color:
                     {
                         r: 175,
@@ -163,8 +163,8 @@ define(['js/letter', 'js/configuration', 'js/animationManager', 'js/selectionMan
                 },
                 {
                     y: this.margin,
-                    scaleX: 0.2,
-                    scaleY: 0.2,
+                    scaleX: 0.5,
+                    scaleY: 0.5,
                     color:
                     {
                         r: 188,
@@ -175,9 +175,9 @@ define(['js/letter', 'js/configuration', 'js/animationManager', 'js/selectionMan
                     letterOpacity: 0.6
                 },
                 {
-                    y: this.margin + letterLength / 16,
-                    scaleX: 0.25,
-                    scaleY: 0.25,
+                    y: this.margin + letterLength / 4,
+                    scaleX: 0.6,
+                    scaleY: 0.6,
                     color:
                     {
                         r: 202,
@@ -188,9 +188,9 @@ define(['js/letter', 'js/configuration', 'js/animationManager', 'js/selectionMan
                     letterOpacity: 0.7
                 },
                 {
-                    y: this.margin + letterLength / 8,
-                    scaleX: 0.33,
-                    scaleY: 0.33,
+                    y: this.margin + letterLength / 2,
+                    scaleX: 0.7,
+                    scaleY: 0.7,
                     color:
                     {
                         r: 215,
@@ -201,9 +201,9 @@ define(['js/letter', 'js/configuration', 'js/animationManager', 'js/selectionMan
                     letterOpacity: 0.8
                 },
                 {
-                    y: this.margin + letterLength / 4,
-                    scaleX: 0.5,
-                    scaleY: 0.5,
+                    y: this.margin + letterLength,
+                    scaleX: 0.8,
+                    scaleY: 0.8,
                     color:
                     {
                         r: 218,
@@ -214,7 +214,7 @@ define(['js/letter', 'js/configuration', 'js/animationManager', 'js/selectionMan
                     letterOpacity: 0.9
                 },
                 {
-                    y: this.margin + letterLength / 2,
+                    y: this.margin + letterLength + letterLength / 2,
                     scaleX: 1,
                     scaleY: 1,
                     color:
@@ -237,8 +237,8 @@ define(['js/letter', 'js/configuration', 'js/animationManager', 'js/selectionMan
 
             this.x = this.targetValues[this.targetValues.length - 1].x - letterLength;
             this.y = this.targetValues[this.targetValues.length - 1].y - letterLength;
-            this.width = this.targetValues[this.targetValues.length - 1].x + letterLength;
-            this.height = this.targetValues[this.targetValues.length - 1].y + letterLength;
+            this.width = this.targetValues[this.targetValues.length - 1].x + letterLength / 10;
+            this.height = this.targetValues[this.targetValues.length - 1].y + letterLength / 10;
 
             SelectionManager.addBoundary(this);
 
@@ -274,7 +274,10 @@ define(['js/letter', 'js/configuration', 'js/animationManager', 'js/selectionMan
 
         onTouchEnd: function (touch)
         {
-            this.letters[this.letters.length - 1].cancelTouch(touch);
+            if (touch.targetBoundary.element === this)
+            {
+                touch.element.cancelTouch(touch);
+            }
         },
 
         letterTransitionComplete: function (callback)
